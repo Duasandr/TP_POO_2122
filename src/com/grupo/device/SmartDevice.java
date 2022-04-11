@@ -7,7 +7,10 @@ import java.util.Objects;
  */
 public abstract class SmartDevice {
    //Variáveis de instância
-   // ...
+   private String id_Fabricante;
+   private boolean estado;
+   private double preco_instalacao;
+   private int potencia;
 
    //Construtores
 
@@ -15,7 +18,7 @@ public abstract class SmartDevice {
      * Construtor vazio
      */
     public SmartDevice(){
-        //...
+        this("null",false,0.0);
    }
 
     /**
@@ -25,7 +28,9 @@ public abstract class SmartDevice {
      * @param preco Preço de instalação definido pelo fabricante.
      */
    public SmartDevice(String id , boolean estado , Double preco){
-        //...
+        this.setIdFabricante(id);
+        this.setEstado(estado);
+        this.setPrecoInstalacao(preco);
    }
 
     /**
@@ -33,7 +38,7 @@ public abstract class SmartDevice {
      * @param device Aparelho a ser copiado.
      */
    public SmartDevice(SmartDevice device){
-        //...
+        this(device.getIdFabricante(), device.getEstado(), device.getPrecoInstalacao());
    }
 
    //Métodos de instância
@@ -44,7 +49,7 @@ public abstract class SmartDevice {
      * @return String Identificador.
      */
    public String getIdFabricante(){
-       return null;
+       return this.id_Fabricante;
    }
 
     /**
@@ -52,7 +57,7 @@ public abstract class SmartDevice {
      * @return Estado do aparelho (ligado — desligado)
      */
    public Boolean getEstado(){
-       return false;
+       return this.estado;
    }
 
     /**
@@ -60,9 +65,14 @@ public abstract class SmartDevice {
      * @return Preço de instalação.
      */
     public Double getPrecoInstalacao(){
-        return 0.0;
+        return this.preco_instalacao;
     }
 
+    /**
+     * Devolve a pot~encia do aparelho. (kw)
+     * @return Potência.
+     */
+    public int getPotencia(){return this.potencia;}
 
     //Setters
 
@@ -71,7 +81,7 @@ public abstract class SmartDevice {
      * @param id Identificador
      */
     protected void setIdFabricante(String id){
-        //...
+        this.id_Fabricante = id;
     }
 
     /**
@@ -79,7 +89,7 @@ public abstract class SmartDevice {
      * @param estado Estado do aparelho (ligado — desligado).
      */
     public void setEstado(Boolean estado){
-        //...
+        this.estado = estado;
     }
 
     /**
@@ -87,7 +97,15 @@ public abstract class SmartDevice {
      * @param preco Preço de instalação.
      */
     protected void setPrecoInstalacao(Double preco){
-        //...
+        this.preco_instalacao = preco;
+    }
+
+    /**
+     * Define a potência do aparelho.
+     * @param potencia Potência.
+     */
+    protected void setPotencia(int potencia){
+        this.potencia = potencia;
     }
 
     /**
@@ -124,7 +142,13 @@ public abstract class SmartDevice {
      */
     @Override
     public String toString(){
-        return null;
+        StringBuilder sb = new StringBuilder();
+        sb.append("SmartDevice = { id_fabricante= " + this.getIdFabricante());
+        sb.append(" , estado = " + this.getEstado());
+        sb.append(" , preco_instalacao = " + this.getPrecoInstalacao());
+        sb.append(" , potencia = " + this.getPotencia());
+        sb.append("}");
+        return sb.toString();
     }
 
     /**
