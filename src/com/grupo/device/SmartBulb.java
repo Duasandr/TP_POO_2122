@@ -34,7 +34,7 @@ public class SmartBulb extends SmartDevice{
 
     }
 
-    protected void setDimensao(int dimensao){
+    protected void setDimensao(double dimensao){
 
     }
 
