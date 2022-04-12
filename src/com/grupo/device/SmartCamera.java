@@ -55,4 +55,7 @@ public class SmartCamera extends SmartDevice {
     public String toString(){
         return null;
     }
+
+    @Override
+    public int hashCode(){return 0;}
 }

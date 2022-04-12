@@ -127,14 +127,7 @@ public abstract class SmartDevice {
      * @return Verdadeiro ou falso.
      */
     @Override
-    public boolean equals(Object o){
-        if(this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        SmartDevice device = (SmartDevice) o;
-        return device.getIdFabricante().equals(this.getIdFabricante()) &&
-                device.getEstado() == this.getEstado() &&
-                device.getPrecoInstalacao().equals(this.getPrecoInstalacao());
-    }
+    public abstract boolean equals(Object o);
 
     /**
      * Devolve uma representação textual do objeto.
@@ -143,10 +136,10 @@ public abstract class SmartDevice {
     @Override
     public String toString(){
         StringBuilder sb = new StringBuilder();
-        sb.append("SmartDevice = { id_fabricante= " + this.getIdFabricante());
-        sb.append(" , estado = " + this.getEstado());
-        sb.append(" , preco_instalacao = " + this.getPrecoInstalacao());
-        sb.append(" , potencia = " + this.getPotencia());
+        sb.append("SmartDevice = { id_fabricante= ").append(this.getIdFabricante());
+        sb.append(" , estado = ").append(this.getEstado());
+        sb.append(" , preco_instalacao = ").append(this.getPrecoInstalacao());
+        sb.append(" , potencia = ").append(this.getPotencia());
         sb.append("}");
         return sb.toString();
     }
@@ -156,7 +149,5 @@ public abstract class SmartDevice {
      * @return Indice
      */
     @Override
-    public int hashCode(){
-        return Objects.hash(this.getIdFabricante());
-    }
+    public abstract int hashCode();
 }

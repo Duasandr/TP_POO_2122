@@ -127,9 +127,14 @@ public class SmartSpeaker extends SmartDevice {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || !(o.getClass().getSimpleName().equals("SmartSpeaker"))) return false;
-        if (!super.equals(o)) return false;
         SmartSpeaker speaker = (SmartSpeaker) o;
-        return getVolume() == speaker.getVolume() && volume_max == speaker.volume_max && getCanal().equals(speaker.getCanal());
+        return this.getIdFabricante().equals(speaker.getIdFabricante()) &&
+                this.getEstado() == speaker.getEstado() &&
+                this.getPotencia() == speaker.getPotencia() &&
+                this.getVolume() == speaker.getVolume() &&
+                this.getPrecoInstalacao().equals(speaker.getPrecoInstalacao()) &&
+                this.getVolumeMaximo() == speaker.getVolumeMaximo() &&
+                this.getCanal().equals(speaker.getCanal());
     }
 
     /**
@@ -138,7 +143,7 @@ public class SmartSpeaker extends SmartDevice {
      */
     @Override
     public int hashCode() {
-        return Objects.hash(super.hashCode(), volume, canal, volume_max);
+        return Objects.hash(this.getIdFabricante(), this.getPrecoInstalacao() , this.getPotencia() , this.getVolumeMaximo());
     }
 
     /**
