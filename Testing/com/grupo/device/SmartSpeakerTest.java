@@ -29,7 +29,7 @@ class SmartSpeakerTest {
             estados[i] =  ((i & 1) == 0);
             potencias[i] = 10 + (i*2);
             precos[i] = 2.5 + (i*2);
-            maxs[i] = i % 100;
+            maxs[i] = (i % 100) + 1;
             volumes[i] = maxs[i] % 100;
             canais[i] = ids[i];
             SmartSpeaker device = new SmartSpeaker(ids[i],estados[i],potencias[i],precos[i],volumes[i],ids[i],maxs[i]);

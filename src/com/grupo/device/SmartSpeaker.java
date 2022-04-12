@@ -37,9 +37,9 @@ public class SmartSpeaker extends SmartDevice {
         this.setEstado(estado);
         this.setPotencia(potencia);
         this.setPrecoInstalacao(preco_instalacao);
+        this.setVolumeMaximo(volume_max);
         this.setVolume(volume);
         this.setCanal(canal);
-        this.setVolumeMaximo(volume_max);
     }
 
     /**
@@ -47,9 +47,7 @@ public class SmartSpeaker extends SmartDevice {
      * @param speaker Aparelho a ser copiado.
      */
     protected SmartSpeaker(SmartSpeaker speaker) {
-        this.volume = speaker.getVolume();
-        this.canal = speaker.getCanal();
-        this.volume_max = speaker.getVolumeMaximo();
+        this(speaker.getIdFabricante(), speaker.getEstado(), speaker.getPotencia(), speaker.getPrecoInstalacao(), speaker.getVolume(), speaker.getCanal(), speaker.getVolumeMaximo());
     }
 
     //Métodos de instância
@@ -59,9 +57,7 @@ public class SmartSpeaker extends SmartDevice {
      * Devolve o volume atual do aparelho selecionado.
      * @return Volume do aparelho.
      */
-    public int getVolume() {
-        return this.volume;
-    }
+    public int getVolume() { return this.volume; }
 
     /**
      * Devolve o canal que está a tocar no aparelho.
@@ -84,7 +80,8 @@ public class SmartSpeaker extends SmartDevice {
      * @param volume Volume do aparelho.
      */
     public void setVolume(int volume) {
-        this.volume = volume;
+        if (volume >= 0 && volume <= this.volume_max)
+            this.volume = volume;
     }
 
     /**
@@ -129,11 +126,10 @@ public class SmartSpeaker extends SmartDevice {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (o == null || !(o.getClass().getSimpleName().equals("SmartSpeaker"))) return false;
+        if (!super.equals(o)) return false;
         SmartSpeaker speaker = (SmartSpeaker) o;
-        return speaker.getVolume() == this.getVolume() &&
-                speaker.getCanal().equals(this.getCanal()) &&
-                speaker.getVolumeMaximo() == this.getVolumeMaximo();
+        return getVolume() == speaker.getVolume() && volume_max == speaker.volume_max && getCanal().equals(speaker.getCanal());
     }
 
     /**
@@ -151,11 +147,9 @@ public class SmartSpeaker extends SmartDevice {
      */
     @Override
     public String toString() {
-        StringBuilder sb = new StringBuilder();
-        sb.append("{ Volume: " + this.getVolume());
-        sb.append(", Canal: " + this.getCanal());
-        sb.append(", Volume Máximo: " + this.getVolumeMaximo());
-        sb.append(" }");
-        return sb.toString();
+        return super.toString() + "{ Volume: " + this.getVolume() +
+                ", Canal: " + this.getCanal() +
+                ", Volume Máximo: " + this.getVolumeMaximo() +
+                " }";
     }
 }
