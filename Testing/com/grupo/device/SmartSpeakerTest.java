@@ -6,6 +6,7 @@ import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -109,6 +110,8 @@ class SmartSpeakerTest {
 
     @Test
     void consumoEnergia() {
+        Optional<Double> consumo = devices.stream().map(SmartSpeaker::consumoEnergia).reduce(Double::sum);
+        System.out.println(consumo);
     }
 
     @Test

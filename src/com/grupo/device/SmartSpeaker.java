@@ -106,7 +106,7 @@ public class SmartSpeaker extends SmartDevice {
      */
     @Override
     public Double consumoEnergia() {
-        return null;
+        return getPotencia() * 0.5 * this.volume;
     }
 
     /**
