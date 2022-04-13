@@ -39,15 +39,15 @@ public class Fabricante {
         this.nome = nome;
     }
 
-    public SmartBulb produzSmartBulb(String id , boolean estado ,int potencia , double preco_instalacao , int tone ,double dimensao){
-        return new SmartBulb(id, estado ,potencia, preco_instalacao, tone, dimensao);
+    public SmartBulb produzSmartBulb(String id , int potencia , double preco_instalacao , double dimensao){
+        return new SmartBulb(id, "desligado" , potencia , preco_instalacao, "neutra" , dimensao);
     }
 
-    public SmartSpeaker produzSmartSpeaker(String id , boolean estado , int potencia , double preco_instalacao , int vol , String canal , int max_vol){
-        return new SmartSpeaker(id, estado ,potencia, preco_instalacao, vol, canal, max_vol);
+    public SmartSpeaker produzSmartSpeaker(String id , int potencia , double preco_instalacao , int max_vol){
+        return new SmartSpeaker(id, "desligado" ,potencia, preco_instalacao, 0, "", max_vol);
     }
 
-    public SmartCamera produzSmartCamera(String id , boolean estado ,int potencia , double preco_instalacao , int res , Double tamanho_ficheiro){
-        return new SmartCamera(id, estado ,potencia, preco_instalacao, res, tamanho_ficheiro);
+    public SmartCamera produzSmartCamera(String id ,int potencia , double preco_instalacao , int res , double tamanho_ficheiro){
+        return new SmartCamera(id, "desligado",potencia, preco_instalacao, res, tamanho_ficheiro);
     }
 }

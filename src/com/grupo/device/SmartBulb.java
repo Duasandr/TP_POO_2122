@@ -1,21 +1,28 @@
 package com.grupo.device;
 
+import java.util.Locale;
 import java.util.Objects;
 
 /**
  * Class SmartBulb
  */
-public class SmartBulb extends SmartDevice{
+public class SmartBulb extends SmartDevice implements Bulb{
+    /**
+     * Posiveis estados da tonalidade
+     */
+    private enum Tonalidade {FRIA , NEUTRA , QUENTE}
+
     //Variáveis de instância
-    private int tonalidade;
-    private Double dimensao;
+    private Tonalidade tonalidade;
+    private double dimensao;
 
     //Construtores
+
     /**
      * Construtor vazio
      */
-    protected SmartBulb(){
-        this("null", false, 0, 0.0, 0, 0.0);
+    public SmartBulb(){
+        this("null", "desligado", 0, 0.0, "fria", 0.0);
     }
 
     /**
@@ -28,11 +35,8 @@ public class SmartBulb extends SmartDevice{
      * @param tone Tipo de luz selecionada.
      * @param dimensao Tamanho do aparelho.
      */
-    protected SmartBulb(String id , boolean estado , int potencia , Double preco_instalacao , int tone , Double dimensao){
-        this.setIdFabricante(id);
-        this.setEstado(estado);
-        this.setPotencia(potencia);
-        this.setPrecoInstalacao(preco_instalacao);
+    public SmartBulb(String id , String estado , int potencia , double preco_instalacao , String tone , double dimensao){
+        super(id,estado,potencia,preco_instalacao);
         this.setTonalidade(tone);
         this.setDimensao(dimensao);
     }
@@ -41,7 +45,7 @@ public class SmartBulb extends SmartDevice{
      * Construtor por cópia.
      * @param bulb Aparelho a ser copiado.
      */
-    protected SmartBulb(SmartBulb bulb){
+    public SmartBulb(SmartBulb bulb){
         this(bulb.getIdFabricante(), bulb.getEstado(), bulb.getPotencia(), bulb.getPrecoInstalacao(), bulb.getTonalidade(), bulb.getDimensao());
     }
 
@@ -53,8 +57,8 @@ public class SmartBulb extends SmartDevice{
      * Devolve a intensidade da luz do aparelho.
      * @return Tipo de luz.
      */
-    public int getTonalidade(){
-        return this.tonalidade;
+    public String getTonalidade(){
+        return this.tonalidade.toString();
     }
 
     /**
@@ -65,35 +69,56 @@ public class SmartBulb extends SmartDevice{
         return this.dimensao;
     }
 
+    //Setters
+
     /**
      * Define a intensidade da luz no aparelho.
      * @param tone Intensidade da luz.
      */
-    public void setTonalidade(int tone){
-        this.tonalidade = tone;
+    private void setTonalidade(String tone){
+        if(tone != null) {
+            String nova_tonalidade = tone.toUpperCase(Locale.ROOT);
+            if (nova_tonalidade.equals(Tonalidade.FRIA.toString()) ||
+                    nova_tonalidade.equals(Tonalidade.NEUTRA.toString()) ||
+                    nova_tonalidade.equals(Tonalidade.QUENTE.toString())) {
+                this.tonalidade = Tonalidade.valueOf(nova_tonalidade);
+            }
+        }
     }
 
     /**
      * Define as dimensões do aparelho.
      * @param dimensao Dimensões do aparelho.
      */
-    protected void setDimensao(Double dimensao){
+    private void setDimensao(double dimensao){
         this.dimensao = dimensao;
     }
+
+    //Métodos de interface
 
     /**
      * Devolve o consumo de energia do aparelho.
      * @return Energia consumida pelo aparelho.
      */
     @Override
-    public Double consumoEnergia() {
-        if (this.getEstado()) {
-            if (this.tonalidade >= 0 && this.tonalidade < 5) return getPotencia() * 0.2;
-            if (this.tonalidade > 5 && this.tonalidade <= 10) return getPotencia() * 0.4;
-            if (this.tonalidade > 10 && this.tonalidade < 15) return getPotencia() * 0.5;
+    public double getConsumoEnergia() {
+        double consumo = 0.0;
+        if(this.getEstado().toUpperCase(Locale.ROOT).equals("LIGADO")){
+            consumo = this.getPotencia() + this.tonalidade.ordinal();
         }
-        return null;
+        return consumo;
     }
+
+    /**
+     * Muda a tonalidade da lâmpada.
+     * @param tone Tonalidade selecionada (frio , neutro , quente)
+     */
+    @Override
+    public void mudaTonalidade(String tone) {
+        this.setTonalidade(tone);
+    }
+
+    //Métodos de Object
 
     /**
      * Clona o aparelho.
@@ -115,11 +140,11 @@ public class SmartBulb extends SmartDevice{
         if (o == null || !(o.getClass().getSimpleName().equals("SmartBulb"))) return false;
         SmartBulb bulb = (SmartBulb) o;
         return this.getIdFabricante().equals(bulb.getIdFabricante()) &&
-                this.getEstado() == bulb.getEstado() &&
+                Objects.equals(this.getEstado(), bulb.getEstado()) &&
                 this.getPotencia() == bulb.getPotencia() &&
-                this.getTonalidade() == bulb.getTonalidade() &&
-                this.getPrecoInstalacao().equals(bulb.getPrecoInstalacao()) &&
-                this.getDimensao() == bulb.getDimensao();
+                Objects.equals(this.getTonalidade(), bulb.getTonalidade()) &&
+                Double.compare(this.getPrecoInstalacao(),bulb.getPrecoInstalacao()) == 0 &&
+                Double.compare(this.getDimensao(),bulb.getDimensao()) == 0;
     }
 
     /**
@@ -129,7 +154,7 @@ public class SmartBulb extends SmartDevice{
     @Override
     public String toString(){
         return super.toString() + "{ Tonalidade: " + this.getTonalidade() +
-                ", Dimensão: " + this.getDimensao() +
+                ", Dimensao: " + this.getDimensao() +
                 "}";
     }
 

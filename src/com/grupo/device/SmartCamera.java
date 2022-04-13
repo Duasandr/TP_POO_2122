@@ -10,7 +10,7 @@ public class SmartCamera extends SmartDevice {
 
     }
 
-    protected SmartCamera(String id , boolean estado , int potencia , double preco_instalacao , int res , Double tamanho_ficheiro){
+    protected SmartCamera(String id , String estado , int potencia , double preco_instalacao , int res , double tamanho_ficheiro){
 
     }
 
@@ -24,7 +24,7 @@ public class SmartCamera extends SmartDevice {
         return 0;
     }
 
-    public Double getTamanhoFicheiro(){
+    public double getTamanhoFicheiro(){
         return 0.0;
     }
 
@@ -37,8 +37,8 @@ public class SmartCamera extends SmartDevice {
     }
 
     @Override
-    public Double consumoEnergia() {
-        return null;
+    public double getConsumoEnergia() {
+        return 0.0;
     }
 
     @Override

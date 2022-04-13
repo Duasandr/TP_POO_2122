@@ -6,10 +6,10 @@ import java.util.Objects;
 /**
  * Class SmartSpeaker
  */
-public class SmartSpeaker extends SmartDevice {
+public class SmartSpeaker extends SmartDevice implements Speaker {
     // Variáveis de instância
-    private int volume;
     private String canal;
+    private int volume;
     private int volume_max;
 
     //Construtores
@@ -18,7 +18,7 @@ public class SmartSpeaker extends SmartDevice {
      * Construtor Vazio
      */
     protected SmartSpeaker() {
-        this("null", false, 0, 0.0, 0, "null", 0);
+        this("null", "desligado", 0, 0.0, 0, "null", 100);
     }
 
     /**
@@ -32,11 +32,8 @@ public class SmartSpeaker extends SmartDevice {
      * @param canal Canal atual do aparelho.
      * @param volume_max Volume máximo do aparelho.
      */
-    protected SmartSpeaker(String id, boolean estado, int potencia, double preco_instalacao, int volume, String canal, int volume_max) {
-        this.setIdFabricante(id);
-        this.setEstado(estado);
-        this.setPotencia(potencia);
-        this.setPrecoInstalacao(preco_instalacao);
+    protected SmartSpeaker(String id, String estado, int potencia, double preco_instalacao, int volume, String canal, int volume_max) {
+        super(id,estado,potencia,preco_instalacao);
         this.setVolumeMaximo(volume_max);
         this.setVolume(volume);
         this.setCanal(canal);
@@ -75,12 +72,13 @@ public class SmartSpeaker extends SmartDevice {
         return this.volume_max;
     }
 
+    //Setters
+
     /**
      * Define o volume do aparelho selecionado.
      * @param volume Volume do aparelho.
      */
-    public void setVolume(int volume) {
-        if (volume >= 0 && volume <= this.volume_max)
+    private void setVolume(int volume) {
             this.volume = volume;
     }
 
@@ -88,7 +86,7 @@ public class SmartSpeaker extends SmartDevice {
      * Define o canal a que está ligado o aparelho.
      * @param canal Canal.
      */
-    public void setCanal(String canal) {
+    private void setCanal(String canal) {
         this.canal = canal;
     }
 
@@ -96,17 +94,52 @@ public class SmartSpeaker extends SmartDevice {
      * Define o volume máximo do aparelho selecionado.
      * @param volume_max Volume máximo do aparelho.
      */
-    protected void setVolumeMaximo(int volume_max) {
+    private void setVolumeMaximo(int volume_max) {
         this.volume_max = volume_max;
     }
+
+    //Métodos Interface
 
     /**
      * Devolve o consumo de energia do aparelho.
      * @return Energia consumida pelo aparelho.
      */
     @Override
-    public Double consumoEnergia() {
+    public double getConsumoEnergia() {
         return getPotencia() * 0.5 * this.volume;
+    }
+
+    /**
+     * Muda o canal em que a coluna de rádio está.
+     * @param canal Novo canal.
+     */
+    @Override
+    public void mudaCanal(String canal) {
+        this.setCanal(canal);
+    }
+
+    /**
+     * Aumenta o volume da coluna.
+     */
+    @Override
+    public void aumentaVolume() {
+        int volume_atual = this.getVolume();
+        if (volume_atual < this.getVolumeMaximo()){
+            volume_atual++;
+            this.setVolume(volume_atual);
+        }
+    }
+
+    /**
+     * Diminui o volume da coluna.
+     */
+    @Override
+    public void diminuiVolume() {
+        int volume_atual = this.getVolume();
+        if (volume_atual > 0){
+            volume_atual--;
+            this.setVolume(volume_atual);
+        }
     }
 
     /**
@@ -129,10 +162,10 @@ public class SmartSpeaker extends SmartDevice {
         if (o == null || !(o.getClass().getSimpleName().equals("SmartSpeaker"))) return false;
         SmartSpeaker speaker = (SmartSpeaker) o;
         return this.getIdFabricante().equals(speaker.getIdFabricante()) &&
-                this.getEstado() == speaker.getEstado() &&
+                Objects.equals(this.getEstado(), speaker.getEstado()) &&
                 this.getPotencia() == speaker.getPotencia() &&
                 this.getVolume() == speaker.getVolume() &&
-                this.getPrecoInstalacao().equals(speaker.getPrecoInstalacao()) &&
+                Double.compare(this.getPrecoInstalacao(),speaker.getPrecoInstalacao()) == 0 &&
                 this.getVolumeMaximo() == speaker.getVolumeMaximo() &&
                 this.getCanal().equals(speaker.getCanal());
     }
