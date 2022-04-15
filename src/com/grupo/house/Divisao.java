@@ -4,11 +4,11 @@ import com.grupo.device.SmartDevice;
 
 import java.util.*;
 
-public class Divisao implements DivisaoInteligente{
+public class Divisao {
     //Variáveis de instância
-    private String                      nome;
+    private String nome;
     private HashMap<String,SmartDevice> aparelhos;
-    private double                      consumo_energia;
+    private double consumo_energia;
 
     //Construtores
 
@@ -16,7 +16,6 @@ public class Divisao implements DivisaoInteligente{
      * Construtor vazio
      */
     public Divisao(){
-        this("null",null);
     }
 
     /**
@@ -24,11 +23,10 @@ public class Divisao implements DivisaoInteligente{
      * @param nome Nome da divisão.
      * @param aparelhos Aparelhos presentes na divisão.
      */
-    public Divisao(String nome , Set<SmartDevice> aparelhos){
-        this.setNome(nome);
+    public Divisao(String nome , Collection<SmartDevice> aparelhos){
+        this.nome = nome;
+        this.aparelhos = new HashMap<>();
         this.setAparelhos(aparelhos);
-        this.atualizaConsumoEnergia();
-
     }
 
     /**
@@ -36,15 +34,12 @@ public class Divisao implements DivisaoInteligente{
      * @param divisao Divisão a copiar.
      */
     public Divisao(Divisao divisao){
-        this.setNome(divisao.getNome());
-        this.setAparelhos((Set<SmartDevice>) divisao.aparelhos.values());
-        this.setConsumoEnergia(divisao.getConsumoEnergia());
+        this(divisao.nome, divisao.aparelhos.values());
     }
 
     //Métodos de instância
 
     //Setters
-
     /**
      * Define o nome da divisão.
      * @param nome Nome da divisão.
@@ -58,14 +53,16 @@ public class Divisao implements DivisaoInteligente{
      *
      * @param aparelhos Aparelhos a inserir.
      */
-    private void setAparelhos(Set<SmartDevice> aparelhos){
+    private void setAparelhos(Collection<SmartDevice> aparelhos){
         if(aparelhos != null) {
             HashMap<String, SmartDevice> clone = new HashMap<>(aparelhos.size());
+
+            this.consumo_energia = 0;
             for (SmartDevice aparelho : aparelhos) {
                 clone.put(aparelho.getIdFabricante(), aparelho.clone());
+                this.consumo_energia += aparelho.getConsumoEnergia();
             }
             this.aparelhos = clone;
-            this.atualizaConsumoEnergia();
         }
     }
 
@@ -109,20 +106,11 @@ public class Divisao implements DivisaoInteligente{
         return this.consumo_energia;
     }
 
-    //Métodos auxiliares
-
-    /**
-     * Atualiza o consumo de energia da divisão.
-     */
-    private void atualizaConsumoEnergia() {
-        double consumo = 0.0;
-        if (this.aparelhos != null) {
-            for (SmartDevice aparelho : this.aparelhos.values()) {
-                consumo += aparelho.getConsumoEnergia();
-            }
-        }
-        this.consumo_energia = consumo;
+    public int getNumeroDispositivos(){
+        return this.aparelhos.size();
     }
+
+    //Métodos auxiliares
 
     /**
      * Verifica se um aparelho existe na divisão.
@@ -139,23 +127,22 @@ public class Divisao implements DivisaoInteligente{
     /**
      * Liga todos os aparelhos presentes na divisão.
      */
-    @Override
     public void ligaTodosDispositivos(){
+        this.consumo_energia = 0;
         for (SmartDevice aparelho : this.aparelhos.values()) {
             aparelho.ligar();
+            this.consumo_energia += aparelho.getConsumoEnergia();
         }
-        this.atualizaConsumoEnergia();
     }
 
     /**
      * Desliga todos os aparelhos presentes na divisão.
      */
-    @Override
     public void desligaTodosDispositivos(){
         for (SmartDevice aparelho : this.aparelhos.values()) {
             aparelho.desligar();
         }
-        this.atualizaConsumoEnergia();
+        this.consumo_energia = 0;
     }
 
     /**
@@ -163,12 +150,14 @@ public class Divisao implements DivisaoInteligente{
      *
      * @param id Identificador do aparelho.
      */
-    @Override
     public void ligaDispositivo(String id){
         if(existeAparelho(id)){
-            this.aparelhos.get(id).ligar();
+            SmartDevice aparelho = this.aparelhos.get(id);
+            if(!aparelho.estaLigado()){
+                aparelho.ligar();
+                this.consumo_energia += aparelho.getConsumoEnergia();
+            }
         }
-        this.atualizaConsumoEnergia();
     }
 
     /**
@@ -176,12 +165,14 @@ public class Divisao implements DivisaoInteligente{
      *
      * @param id Identificador do aparelho.
      */
-    @Override
     public void desligaDispositivo(String id){
         if(existeAparelho(id)){
-            this.aparelhos.get(id).desligar();
+            SmartDevice aparelho = this.aparelhos.get(id);
+            if(aparelho.estaLigado()){
+                this.consumo_energia -= aparelho.getConsumoEnergia();
+                aparelho.desligar();
+            }
         }
-        this.atualizaConsumoEnergia();
     }
 
     /**
@@ -220,8 +211,8 @@ public class Divisao implements DivisaoInteligente{
         if (o == null || getClass() != o.getClass()) return false;
         Divisao divisao = (Divisao) o;
         return Double.compare(divisao.consumo_energia, consumo_energia) == 0 &&
-                this.aparelhos.equals(divisao.aparelhos) &&
-                this.nome.equals(divisao.nome);
+                Objects.equals(nome, divisao.nome) &&
+                Objects.equals(aparelhos, divisao.aparelhos);
     }
 
     /**

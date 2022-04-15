@@ -3,12 +3,17 @@ package com.grupo.house;
 import java.util.*;
 
 
-public class Casa implements CasaInteligente{
+public class Casa {
     //Variáveis de instância
 
+    private String morada;
     private String proprietario;
+    private String fornecedor;
     private int nif_proprietario;
     private HashMap<String , Divisao> divisoes;
+    private int numero_dispositivos;
+    private double consumo_energia;
+    private TreeSet<Long> faturas;
 
     //Construtores
 
@@ -16,7 +21,6 @@ public class Casa implements CasaInteligente{
      * Construtor vazio.
      */
     public Casa(){
-        this("null",0,null);
     }
 
     /**
@@ -25,14 +29,18 @@ public class Casa implements CasaInteligente{
      * @param nif_proprietario Número de identificação fiscal do proprietário.
      * @param divisoes Divisões da casa.
      */
-    public Casa(String proprietario, int nif_proprietario , Set<Divisao> divisoes){
-        this.setProprietario(proprietario);
-        this.setNifProprietario(nif_proprietario);
+    public Casa(String proprietario,String morada , int nif_proprietario , Collection<Divisao> divisoes , String fornecedor){
+        this.proprietario = proprietario;
+        this.nif_proprietario = nif_proprietario;
+        this.fornecedor = fornecedor;
+        this.morada = morada;
+        this.divisoes = new HashMap<>();
+        this.faturas = new TreeSet<>();
         this.setDivisoes(divisoes);
     }
 
     public Casa(Casa casa){
-        this(casa.getProprietario(),casa.getNifProprietario(), (Set<Divisao>) casa.divisoes.values());
+        this(casa.proprietario , casa.morada, casa.nif_proprietario, casa.divisoes.values(), casa.fornecedor);
     }
 
     //Métodos de instância
@@ -40,11 +48,27 @@ public class Casa implements CasaInteligente{
     //Setters
 
     /**
+     * Define a morada da casa.
+     * @param morada Morada da casa.
+     */
+    public void setMorada(String morada) {
+        this.morada = morada;
+    }
+
+    /**
      * Define o nome do proprietário.
      * @param proprietario Nome.
      */
     public void setProprietario(String proprietario) {
         this.proprietario = proprietario;
+    }
+
+    /**
+     * Define o fornecedor de energia da casa.
+     * @param fornecedor Nome do fornecedor de energia.
+     */
+    public void setFornecedor(String fornecedor) {
+        this.fornecedor = fornecedor;
     }
 
     /**
@@ -59,17 +83,46 @@ public class Casa implements CasaInteligente{
      * Define as divisões da casa.
      * @param divisoes Divisões a copiar.
      */
-    private void setDivisoes(Set<Divisao> divisoes) {
+    public void setDivisoes(Collection<Divisao> divisoes) {
         if(divisoes != null) {
             HashMap<String, Divisao> copia = new HashMap<>(divisoes.size());
+
+            this.numero_dispositivos = 0;
+            this.consumo_energia = 0;
             for (Divisao divisao : divisoes) {
                 copia.put(divisao.getNome(), divisao.clone());
+                numero_dispositivos += divisao.getNumeroDispositivos();
+                consumo_energia += divisao.getConsumoEnergia();
             }
             this.divisoes = copia;
         }
     }
 
+    /**
+     * Define o número de dispositivos da casa.
+     * @param numero_dispositivos Número de dispositivos.
+     */
+    public void setNumeroDispositivos(int numero_dispositivos) {
+        this.numero_dispositivos = numero_dispositivos;
+    }
+
+    /**
+     * Define o consumo de energia da casa.
+     * @param consumo_energia consumo de energia em watts.
+     */
+    public void setConsumoEnergia(double consumo_energia) {
+        this.consumo_energia = consumo_energia;
+    }
+
     //Getters
+
+    /**
+     * Devolve a morada da casa.
+     * @return Morada da casa.
+     */
+    public String getMorada() {
+        return morada;
+    }
 
     /**
      * Devolve o nome do proprietário da casa.
@@ -94,7 +147,7 @@ public class Casa implements CasaInteligente{
      *
      * @return Conjunto que contem as divisões da casa.
      */
-    private Set<Divisao> getDivisoes(){
+    public Set<Divisao> getDivisoes(){
         Set<Divisao> copia = new HashSet<>(this.divisoes.size());
         for (Divisao divisao : this.divisoes.values()) {
             copia.add(divisao.clone());
@@ -102,7 +155,40 @@ public class Casa implements CasaInteligente{
         return copia;
     }
 
+    /**
+     * Devolve o número de dispositivos na casa.
+     * @return Número de dispositivos
+     */
+    public int getNumeroDispositivos(){
+        return this.numero_dispositivos;
+    }
+
+    /**
+     * Devolve o consumo de uma divisão em watts.
+     * @return Energia gasta em watts.
+     */
+    public double getConsumoEnergia(){
+        return this.consumo_energia;
+    }
+
+    /**
+     * Devolve o nome do fornecedor de energia.
+     * @return Fornecedor de energia.
+     */
+    public String getFornecedor() {
+        return this.fornecedor;
+    }
+
+    /**
+     * Devolve um array com os identificadores de faturas emitidas
+     * @return Array de faturas emitidas.
+     */
+    public Long[] getFaturas(){
+        return this.faturas.toArray(Long[]::new);
+    }
+
     //Métodos auxiliares
+
     /**
      * testa se uma divisão existe na casa.
      *
@@ -132,15 +218,17 @@ public class Casa implements CasaInteligente{
     }
 
     //Métodos de interface
+
     /**
      * Liga todos os dispositivos de uma divisão da casa.
      *
      * @param nome Nome da divisão.
      */
-    @Override
     public void ligarTodosDispositivos(String nome) {
         if(existeDivisao(nome)){
-            this.divisoes.get(nome).ligaTodosDispositivos();
+            Divisao divisao = this.divisoes.get(nome);
+            divisao.ligaTodosDispositivos();
+            this.consumo_energia += divisao.getConsumoEnergia();
         }
     }
 
@@ -149,10 +237,11 @@ public class Casa implements CasaInteligente{
      *
      * @param nome Nome da divisão.
      */
-    @Override
     public void desligarTodosDispositivos(String nome) {
         if(existeDivisao(nome)){
-            this.divisoes.get(nome).desligaTodosDispositivos();
+            Divisao divisao = this.divisoes.get(nome);
+            this.consumo_energia -= divisao.getConsumoEnergia();
+            divisao.desligaTodosDispositivos();
         }
     }
 
@@ -160,11 +249,14 @@ public class Casa implements CasaInteligente{
      * Liga um aparelho em específico.
      * @param id Identificador do aparelho.
      */
-    @Override
     public void ligarDispositivo(String id) {
-        String divisao = divisaoDoAparelho(id);
-        if(divisao != null){
-            this.divisoes.get(divisao).ligaDispositivo(id);
+        String local = divisaoDoAparelho(id);
+        if(local != null){
+            Divisao divisao = this.divisoes.get(local);
+
+            this.consumo_energia -= divisao.getConsumoEnergia();
+            divisao.ligaDispositivo(id);
+            this.consumo_energia += divisao.getConsumoEnergia();
         }
     }
 
@@ -172,12 +264,31 @@ public class Casa implements CasaInteligente{
      * Desliga um aparelho em específico.
      * @param id Identificador do aparelho.
      */
-    @Override
     public void desligarDispositivo(String id) {
-        String divisao = divisaoDoAparelho(id);
-        if(divisao != null){
-            this.divisoes.get(divisao).desligaDispositivo(id);
+        String local = divisaoDoAparelho(id);
+        if(local != null){
+            Divisao divisao = this.divisoes.get(local);
+
+            this.consumo_energia -= divisao.getConsumoEnergia();
+            divisao.desligaDispositivo(id);
+            this.consumo_energia += divisao.getConsumoEnergia();
         }
+    }
+
+    /**
+     * Guarda o identificador da fatura emitida.
+     * @param id Identificador da fatura.
+     */
+    public void guardaFatura(long id){
+        this.faturas.add(id);
+    }
+
+    /**
+     * Identificador da última fatura emitida.
+     * @return Identificador da última fatura.
+     */
+    public long ultimaFatura(){
+        return this.faturas.last();
     }
 
     //Métodos de Object
@@ -187,13 +298,16 @@ public class Casa implements CasaInteligente{
      * @param o Objeto a comparar.
      * @return true - false
      */
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Casa casa = (Casa) o;
         return this.nif_proprietario == casa.nif_proprietario &&
-                this.getProprietario().equals(casa.getProprietario()) &&
+                this.numero_dispositivos == casa.numero_dispositivos &&
+                this.morada.equals(casa.morada) &&
+                this.proprietario.equals(casa.proprietario) &&
                 this.divisoes.equals(casa.divisoes);
     }
 
@@ -213,15 +327,17 @@ public class Casa implements CasaInteligente{
     @Override
     public String toString() {
         final StringBuilder sb = new StringBuilder("Casa{");
-        sb.append("proprietario='").append(proprietario).append('\'');
+        sb.append("morada='").append(morada).append('\'');
+        sb.append(", proprietario='").append(proprietario).append('\'');
         sb.append(", nif_proprietario=").append(nif_proprietario);
         sb.append(", divisoes=").append(divisoes);
+        sb.append(", numero_dispositivos=").append(numero_dispositivos);
         sb.append('}');
         return sb.toString();
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(proprietario, nif_proprietario);
+        return Objects.hash(proprietario, nif_proprietario , morada);
     }
 }
