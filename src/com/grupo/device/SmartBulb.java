@@ -6,12 +6,14 @@ import java.util.Objects;
  * Class SmartBulb
  */
 public class SmartBulb extends SmartDevice {
+    private static final double valor_fixo = 0.1;
+
     /**
      * Posiveis estados da tonalidade
      */
     public enum Tonalidade {
-        FRIA ,
-        NEUTRA ,
+        FRIA,
+        NEUTRA,
         QUENTE
     }
 
@@ -24,30 +26,31 @@ public class SmartBulb extends SmartDevice {
     /**
      * Construtor vazio
      */
-    public SmartBulb(){
+    public SmartBulb() {
     }
 
     /**
      * Construtor por parâmetros
-     * @param id Identificador do fabricante.
-     * @param estado Estado atual do aparelho (ligado - desligado).
-     * @param potencia Potência de consumo do aparelho.
+     *
+     * @param id               Identificador do fabricante.
+     * @param estado           Estado atual do aparelho (ligado - desligado).
      * @param preco_instalacao Preço de instalação definido pelo fabricante.
-     * @param tone Tipo de luz selecionada.
-     * @param dimensao Tamanho do aparelho.
+     * @param tone             Tipo de luz selecionada.
+     * @param dimensao         Tamanho do aparelho.
      */
-    public SmartBulb(String id , Estado estado , int potencia , double preco_instalacao , Tonalidade tone , double dimensao){
-        super(id,estado,potencia,preco_instalacao);
+    public SmartBulb(String id, Estado estado, double preco_instalacao, Tonalidade tone, double dimensao) {
+        super(id, estado, preco_instalacao);
         this.tonalidade = tone;
         this.dimensao = dimensao;
     }
 
     /**
      * Construtor por cópia.
+     *
      * @param bulb Aparelho a ser copiado.
      */
-    public SmartBulb(SmartBulb bulb){
-        this(bulb.getIdFabricante(), bulb.getEstado(), bulb.getPotencia(), bulb.getPrecoInstalacao(), bulb.tonalidade, bulb.dimensao);
+    public SmartBulb(SmartBulb bulb) {
+        this(bulb.getIdFabricante(), bulb.getEstado(), bulb.getPrecoInstalacao(), bulb.tonalidade, bulb.dimensao);
     }
 
     //Métodos de instância
@@ -56,17 +59,19 @@ public class SmartBulb extends SmartDevice {
 
     /**
      * Devolve a intensidade da luz do aparelho.
+     *
      * @return Tipo de luz.
      */
-    public Tonalidade getTonalidade(){
+    public Tonalidade getTonalidade() {
         return this.tonalidade;
     }
 
     /**
      * Devolve as dimensões do aparelho.
+     *
      * @return Dimensões do aparelho.
      */
-    public double getDimensao(){
+    public double getDimensao() {
         return this.dimensao;
     }
 
@@ -74,19 +79,21 @@ public class SmartBulb extends SmartDevice {
 
     /**
      * Define a intensidade da luz no aparelho.
+     *
      * @param tone Intensidade da luz.
      */
-    private void setTonalidade(Tonalidade tone){
-        if(tone != null) {
+    private void setTonalidade(Tonalidade tone) {
+        if (tone != null) {
             this.tonalidade = tone;
         }
     }
 
     /**
      * Define as dimensões do aparelho.
+     *
      * @param dimensao Dimensões do aparelho.
      */
-    public void setDimensao(double dimensao){
+    public void setDimensao(double dimensao) {
         this.dimensao = dimensao;
     }
 
@@ -94,16 +101,17 @@ public class SmartBulb extends SmartDevice {
 
     /**
      * Devolve o consumo de energia do aparelho.
+     *
      * @return Energia consumida pelo aparelho.
      */
     @Override
     public double getConsumoEnergia() {
         double consumo = 0.0;
-        if(this.getEstado() == Estado.LIGADO){
-            switch (this.tonalidade){
-                case FRIA -> consumo = this.getPotencia() * 1.2;
-                case NEUTRA -> consumo = this.getPotencia();
-                case QUENTE -> consumo = this.getPotencia() * 1.4;
+        if (this.getEstado() == Estado.LIGADO) {
+            switch (this.tonalidade) {
+                case FRIA -> consumo = valor_fixo + this.getDimensao() * 1.2;
+                case NEUTRA -> consumo = valor_fixo + this.getDimensao() * 1;
+                case QUENTE -> consumo = valor_fixo + this.getDimensao() * 1.4;
             }
         }
         return consumo;
@@ -111,6 +119,7 @@ public class SmartBulb extends SmartDevice {
 
     /**
      * Muda a tonalidade da lâmpada.
+     *
      * @param tone Tonalidade selecionada (frio , neutro , quente)
      */
     public void mudaTonalidade(Tonalidade tone) {
@@ -121,6 +130,7 @@ public class SmartBulb extends SmartDevice {
 
     /**
      * Clona o aparelho.
+     *
      * @return Aparelho clonado.
      */
     @Override
@@ -130,6 +140,7 @@ public class SmartBulb extends SmartDevice {
 
     /**
      * Verifica se dois objetos são iguais.
+     *
      * @param o Objeto a comparar.
      * @return Verdadeiro ou Falso.
      */
@@ -140,18 +151,18 @@ public class SmartBulb extends SmartDevice {
         SmartBulb bulb = (SmartBulb) o;
         return this.getIdFabricante().equals(bulb.getIdFabricante()) &&
                 Objects.equals(this.getEstado(), bulb.getEstado()) &&
-                this.getPotencia() == bulb.getPotencia() &&
                 Objects.equals(this.getTonalidade(), bulb.getTonalidade()) &&
-                Double.compare(this.getPrecoInstalacao(),bulb.getPrecoInstalacao()) == 0 &&
-                Double.compare(this.getDimensao(),bulb.getDimensao()) == 0;
+                Double.compare(this.getPrecoInstalacao(), bulb.getPrecoInstalacao()) == 0 &&
+                Double.compare(this.getDimensao(), bulb.getDimensao()) == 0;
     }
 
     /**
      * Devolve uma representação textual do objeto.
+     *
      * @return Representação do objeto.
      */
     @Override
-    public String toString(){
+    public String toString() {
         return super.toString() + "{ Tonalidade: " + this.getTonalidade() +
                 ", Dimensao: " + this.getDimensao() +
                 "}";
@@ -159,10 +170,11 @@ public class SmartBulb extends SmartDevice {
 
     /**
      * Cria um indice através de uma função de hash.
+     *
      * @return Indice
      */
     @Override
     public int hashCode() {
-        return Objects.hash(this.getIdFabricante(), this.getPotencia(), this.getPrecoInstalacao());
+        return Objects.hash(this.getIdFabricante(), this.getPrecoInstalacao());
     }
 }

@@ -7,7 +7,6 @@ public abstract class SmartDevice {
    //Variáveis de instância
    private String id;
    private Estado estado;
-   private int potencia;
    private double preco_instalacao;
 
    //Variáveis de classe
@@ -27,13 +26,11 @@ public abstract class SmartDevice {
      * Construtor por parâmetros.
      * @param id Identificador do fabricante
      * @param estado Estado atual do aparelho (ligado — desligado)
-     * @param potencia Potencia do aparelho em watts.
      * @param preco Preço de instalação definido pelo fabricante.
      */
-   public SmartDevice(String id , Estado estado , int potencia , double preco){
+   public SmartDevice(String id , Estado estado , double preco){
         this.id = id;
         this.estado = estado;
-        this.potencia = potencia;
         this.preco_instalacao = preco;
    }
 
@@ -42,7 +39,7 @@ public abstract class SmartDevice {
      * @param device Aparelho a ser copiado.
      */
    public SmartDevice(SmartDevice device){
-        this(device.id, device.estado, device.potencia , device.preco_instalacao);
+        this(device.id, device.estado, device.preco_instalacao);
    }
 
    //Métodos de instância
@@ -71,12 +68,6 @@ public abstract class SmartDevice {
     public double getPrecoInstalacao(){
         return this.preco_instalacao;
     }
-
-    /**
-     * Devolve a pot~encia do aparelho. (kw)
-     * @return Potência.
-     */
-    public int getPotencia(){return this.potencia;}
 
     /**
      * Devolve o consumo de energia que do aparelho.
@@ -110,14 +101,6 @@ public abstract class SmartDevice {
      */
     public void setPrecoInstalacao(double preco){
         this.preco_instalacao = preco;
-    }
-
-    /**
-     * Define a potência do aparelho.
-     * @param potencia Potência.
-     */
-    public void setPotencia(int potencia){
-        this.potencia = potencia;
     }
 
     //Interface
@@ -169,7 +152,6 @@ public abstract class SmartDevice {
         final StringBuilder sb = new StringBuilder("SmartDevice{");
         sb.append("id='").append(id).append('\'');
         sb.append(", estado=").append(estado);
-        sb.append(", potencia=").append(potencia);
         sb.append(", preco_instalacao=").append(preco_instalacao);
         sb.append('}');
         return sb.toString();
