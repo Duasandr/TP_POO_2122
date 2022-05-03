@@ -11,6 +11,7 @@ public class SmartSpeaker extends SmartDevice {
     private String canal;
     private int volume_max;
     private int volume;
+    private static final double valor_fixo = 0.4;
 
     //Construtores
 
@@ -24,14 +25,13 @@ public class SmartSpeaker extends SmartDevice {
      * Construtor por parâmetros
      *  @param id Identificador do fabricante.
      * @param estado Estado atual do aparelho (ligado - desligado).
-     * @param potencia Potência de consumo do aparelho.
      * @param preco_instalacao Preço de instalação definido pelo fabricante.
      * @param volume Estado atual do volume do aparelho.
      * @param canal Canal atual do aparelho.
      * @param volume_max Volume máximo do aparelho.
      */
-    public SmartSpeaker(String id, Estado estado, int potencia, double preco_instalacao, int volume, String canal, int volume_max) {
-        super(id,estado,potencia,preco_instalacao);
+    public SmartSpeaker(String id, Estado estado, double preco_instalacao, int volume, String canal, int volume_max) {
+        super(id,estado,preco_instalacao);
         this.volume = volume;
         this.canal = canal;
         this.volume_max = volume_max;
@@ -42,7 +42,7 @@ public class SmartSpeaker extends SmartDevice {
      * @param speaker Aparelho a ser copiado.
      */
     public SmartSpeaker(SmartSpeaker speaker) {
-        this(speaker.getIdFabricante(), speaker.getEstado(), speaker.getPotencia(), speaker.getPrecoInstalacao(), speaker.volume, speaker.canal, speaker.volume_max);
+        this(speaker.getIdFabricante(), speaker.getEstado(), speaker.getPrecoInstalacao(), speaker.volume, speaker.canal, speaker.volume_max);
     }
 
     //Métodos de instância
@@ -104,7 +104,7 @@ public class SmartSpeaker extends SmartDevice {
      */
     @Override
     public double getConsumoEnergia() {
-        return this.getEstado() == Estado.LIGADO ? this.getPotencia() * 0.5 * this.volume : 0.0;
+        return this.getEstado() == Estado.LIGADO ? valor_fixo + 0.5 * this.volume : 0.0;
     }
 
     /**
@@ -158,7 +158,6 @@ public class SmartSpeaker extends SmartDevice {
         SmartSpeaker speaker = (SmartSpeaker) o;
         return this.getIdFabricante().equals(speaker.getIdFabricante()) &&
                 this.getEstado().equals(speaker.getEstado()) &&
-                this.getPotencia() == speaker.getPotencia() &&
                 Double.compare(this.getPrecoInstalacao(),speaker.getPrecoInstalacao()) == 0 &&
                 this.volume_max == speaker.volume_max &&
                 this.volume == speaker.volume &&
