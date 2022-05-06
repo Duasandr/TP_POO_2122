@@ -1,5 +1,7 @@
 package com.grupo.house;
 
+import com.grupo.device.SmartDevice;
+
 import java.util.*;
 
 
@@ -339,5 +341,26 @@ public class Casa {
     @Override
     public int hashCode() {
         return Objects.hash(proprietario, nif_proprietario , morada);
+    }
+
+    public static Casa parse(String str){
+        String[] tokens = str.split("\\{");
+        String[] tokens_casa = tokens[0].split(";");
+        String[] tokens_divisoes = tokens[1].split("\\|");
+        Casa casa = new Casa();
+        casa.morada = tokens_casa[0];
+        casa.proprietario = tokens_casa[1];
+        casa.fornecedor = tokens_casa[2];
+        casa.nif_proprietario = Integer.parseInt(tokens_casa[3]);
+
+        Set<Divisao> divisoes = new HashSet<>();
+
+        for (String divisao : tokens_divisoes) {
+            divisoes.add(Divisao.parse(divisao));
+        }
+
+        casa.setDivisoes(divisoes);
+
+        return casa;
     }
 }

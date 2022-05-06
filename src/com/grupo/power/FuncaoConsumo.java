@@ -2,6 +2,8 @@ package com.grupo.power;
 
 import com.grupo.house.Casa;
 
+import java.util.Locale;
+
 public abstract class FuncaoConsumo {
     /**
      * Função abstrata que permite calcular o total a pagar de um consumo de uma casa
@@ -11,4 +13,16 @@ public abstract class FuncaoConsumo {
 
     @Override
     public abstract String toString();
+
+    public static FuncaoConsumo parse(String str){
+        FuncaoConsumo funcao = null;
+        switch (str.toUpperCase(Locale.ROOT)){
+            case "FUNCAOPADRAO":
+                funcao = new FuncaoConsumoPadrao();
+                break;
+            default:
+                break;
+        }
+        return funcao;
+    }
 }

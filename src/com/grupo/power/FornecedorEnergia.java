@@ -193,9 +193,15 @@ public class FornecedorEnergia {
      * @param str Nome do fornecedor
      * @return FornecedorEnergia Uma nova instância de Fornecedor
      */
-    public FornecedorEnergia parse(String str){
+    public static FornecedorEnergia parse(String str){
         String[] tokens = str.split(";");
-        return new FornecedorEnergia(str,valor_base_por_omissao,imposto_por_omissao,new FuncaoConsumoPadrao());
+        FornecedorEnergia fornecedor = new FornecedorEnergia();
+        fornecedor.nome = tokens[0];
+        fornecedor.valor_base = Double.parseDouble(tokens[1]);
+        fornecedor.imposto = Double.parseDouble(tokens[2]);
+        fornecedor.funcao_consumo = FuncaoConsumo.parse(tokens[3]);
+
+        return fornecedor;
     }
 
     //Métodos herdados de Object

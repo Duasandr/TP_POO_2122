@@ -125,8 +125,8 @@ public class SmartSpeaker extends SmartDevice {
         speaker.setIdFabricante(tokens[0]);
         speaker.setEstado(SmartDevice.parseEstado(tokens[1]));
         speaker.setPrecoInstalacao(Double.parseDouble(tokens[2]));
-        tokens[3] = speaker.canal;
-        speaker.volume = Integer.parseInt(tokens[4]);
+        speaker.volume = Integer.parseInt(tokens[3]);
+        speaker.canal = tokens[4];
         speaker.volume_max = Integer.parseInt(tokens[5]);
 
         return speaker;

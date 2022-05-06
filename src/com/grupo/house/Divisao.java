@@ -225,4 +225,20 @@ public class Divisao {
     public int hashCode() {
         return Objects.hash(nome);
     }
+
+    public static Divisao parse(String str){
+        String[] tokens = str.split("\\[");
+        String[] str_dispositivos = tokens[1].split(" ");
+        Divisao divisao = new Divisao();
+        Set<SmartDevice> dispositivos = new HashSet<>(str_dispositivos.length);
+
+        for (String disp : str_dispositivos) {
+            dispositivos.add(SmartDevice.parse(disp));
+        }
+
+        divisao.setNome(tokens[0]);
+        divisao.setAparelhos(dispositivos);
+
+        return divisao;
+    }
 }

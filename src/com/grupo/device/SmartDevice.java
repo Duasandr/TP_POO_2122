@@ -185,4 +185,17 @@ public abstract class SmartDevice {
      */
     @Override
     public abstract int hashCode();
+
+    public static SmartDevice parse(String str){
+        String[] tokens = str.split(":");
+        SmartDevice device = null;
+        switch (tokens[0]) {
+            case "Bulb" -> device = SmartBulb.parse(tokens[1]);
+            case "Speaker" -> device = SmartSpeaker.parse(tokens[1]);
+            case "Camera" -> device = SmartCamera.parse(tokens[1]);
+            default -> {
+            }
+        }
+        return device;
+    }
 }
