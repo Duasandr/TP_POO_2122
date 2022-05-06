@@ -26,7 +26,7 @@ class SimuladorTest {
 
     @Test
     void avancaNoTempo() {
-        SmartDevice device1 = new SmartSpeaker("dispositivo1", SmartDevice.Estado.LIGADO,120,22.99,10,"Canal1",50);
+        /*SmartDevice device1 = new SmartSpeaker("dispositivo1", SmartDevice.Estado.LIGADO,120,22.99,10,"Canal1",50);
         SmartDevice device2 = new SmartSpeaker("dispositivo2",SmartDevice.Estado.LIGADO,120,22.99,10,"Canal1",50);
         SmartDevice device3 = new SmartSpeaker("dispositivo3",SmartDevice.Estado.LIGADO,120,22.99,10,"Canal1",50);
         SmartDevice device4 = new SmartSpeaker("dispositivo4",SmartDevice.Estado.LIGADO,120,22.99,10,"Canal1",50);
@@ -73,7 +73,7 @@ class SimuladorTest {
         sim.avancaNoTempo(2);
         sim.avancaNoTempo(2);
         sim.avancaNoTempo(2);
-        System.out.println(sim.consumoCasasEntreDatas(LocalDateTime.now(),LocalDateTime.MAX));
+        System.out.println(sim.consumoCasasEntreDatas(LocalDateTime.now(),LocalDateTime.MAX));*/
     }
 
     @Test

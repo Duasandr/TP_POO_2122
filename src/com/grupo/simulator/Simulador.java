@@ -122,7 +122,7 @@ public class Simulador {
 
     public void alteraFornecedorDesconto(String fornecedor , FuncaoDesconto novo_valor){
         if(this.fornecedores.containsKey(fornecedor)){
-            this.fornecedores.get(fornecedor).setFuncaoDesconto(novo_valor);
+            //this.fornecedores.get(fornecedor).setFuncaoDesconto(novo_valor);
         }
     }
 
@@ -169,10 +169,10 @@ public class Simulador {
 
         if(this.fornecedores.containsKey(nome)) {
             for (FornecedorEnergia fornecedor : this.fornecedores.values()) {
-                for (Long id_fatura : fornecedor.getFaturas()) {
+                /*for (Long id_fatura : fornecedor.getFaturas()) {
                     Fatura fatura = this.faturas.get(id_fatura);
                     copia.add(fatura.clone());
-                }
+                }*/
             }
         }
         return  copia;

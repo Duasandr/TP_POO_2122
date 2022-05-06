@@ -15,10 +15,6 @@ public class Fatura {
     private String morada;
     private int nif_cliente;
     private String fornecedor;
-    private double total_consumo;
-    private double preco_kw;
-    private double imposto;
-    private double desconto;
     private double total_a_pagar;
     private LocalDateTime inicio;
     private LocalDateTime fim;
@@ -54,10 +50,6 @@ public class Fatura {
         this.morada = morada;
         this.nif_cliente = nif_cliente;
         this.fornecedor = fornecedor;
-        this.total_consumo = total_consumo;
-        this.preco_kw = preco_kw;
-        this.imposto = imposto;
-        this.desconto = desconto;
         this.total_a_pagar = total_a_pagar;
         this.inicio = inicio;
         this.fim = fim;
@@ -75,16 +67,11 @@ public class Fatura {
         this.morada = casa.getMorada();
         this.nif_cliente = casa.getNifProprietario();
         this.fornecedor = fornecedor.getNome();
-        this.total_consumo = casa.getConsumoEnergia();
-        this.preco_kw = fornecedor.getValorBase();
-        this.imposto = fornecedor.getImposto();
-        this.imposto = fornecedor.getImposto();
-        this.desconto = fornecedor.calculaDesconto(casa.getConsumoEnergia(), casa.getNumeroDispositivos());
-        this.total_a_pagar = this.preco_kw * this.total_consumo * 0.001 * this.desconto;
+
         this.inicio = inicio;
         this.fim = fim;
         casa.guardaFatura(this.id);
-        fornecedor.guardaFatura(this.id,total_a_pagar);
+        //fornecedor.guardaFatura(this.id,total_a_pagar);
     }
 
     /**
@@ -97,10 +84,6 @@ public class Fatura {
         this.morada = fatura.morada;
         this.nif_cliente = fatura.nif_cliente;
         this.fornecedor = fatura.fornecedor;
-        this.total_consumo = fatura.total_consumo;
-        this.preco_kw = fatura.preco_kw;
-        this.imposto = fatura.imposto;
-        this.desconto = fatura.desconto;
         this.total_a_pagar = fatura.total_a_pagar;
         this.inicio = fatura.inicio;
         this.fim = fatura.fim;
@@ -127,7 +110,7 @@ public class Fatura {
     }
 
     public double getTotalConsumo() {
-        return total_consumo;
+        return 0.0;//total_consumo;
     }
 
     /**
@@ -142,10 +125,6 @@ public class Fatura {
         Fatura fatura = (Fatura) o;
         return this.id == fatura.id &&
                 nif_cliente == fatura.nif_cliente &&
-                Double.compare(fatura.total_consumo, total_consumo) == 0 &&
-                Double.compare(fatura.preco_kw, preco_kw) == 0 &&
-                Double.compare(fatura.imposto, imposto) == 0 &&
-                Double.compare(fatura.desconto, desconto) == 0 &&
                 Double.compare(fatura.total_a_pagar, total_a_pagar) == 0 &&
                 Objects.equals(cliente, fatura.cliente) && Objects.equals(morada, fatura.morada) &&
                 Objects.equals(fornecedor, fatura.fornecedor);
@@ -157,7 +136,7 @@ public class Fatura {
      */
     @Override
     public int hashCode() {
-        return Objects.hash(id,cliente, morada, nif_cliente, fornecedor, total_consumo, preco_kw, imposto, desconto, total_a_pagar);
+        return Objects.hash(id,cliente, morada, nif_cliente, fornecedor, total_a_pagar);
     }
 
     /**
@@ -181,10 +160,6 @@ public class Fatura {
         sb.append(", morada='").append(morada).append('\'');
         sb.append(", nif_cliente=").append(nif_cliente);
         sb.append(", fornecedor='").append(fornecedor).append('\'');
-        sb.append(", total_consumo=").append(total_consumo);
-        sb.append(", preco_kw=").append(preco_kw);
-        sb.append(", imposto=").append(imposto);
-        sb.append(", desconto=").append(desconto);
         sb.append(", total_a_pagar=").append(total_a_pagar);
         sb.append(", inicio=").append(inicio);
         sb.append(", fim=").append(fim);

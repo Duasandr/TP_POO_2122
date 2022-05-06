@@ -1,11 +1,13 @@
 package com.grupo.device;
 
+import java.io.Serializable;
+import java.util.Locale;
 import java.util.Objects;
 
 /**
  * Class SmartBulb
  */
-public class SmartBulb extends SmartDevice {
+public class SmartBulb extends SmartDevice implements Serializable {
     private static final double valor_fixo = 0.1;
 
     /**
@@ -97,7 +99,7 @@ public class SmartBulb extends SmartDevice {
         this.dimensao = dimensao;
     }
 
-    //Métodos de interface
+    //Métodos herdados
 
     /**
      * Devolve o consumo de energia do aparelho.
@@ -117,6 +119,8 @@ public class SmartBulb extends SmartDevice {
         return consumo;
     }
 
+    //Métodos de instância
+
     /**
      * Muda a tonalidade da lâmpada.
      *
@@ -126,7 +130,40 @@ public class SmartBulb extends SmartDevice {
         this.setTonalidade(tone);
     }
 
-    //Métodos de Object
+    public static Tonalidade parseTonalidade(String str){
+        Tonalidade tone;
+        switch (str.toUpperCase(Locale.ROOT)){
+            case "FRIA":
+                tone = Tonalidade.FRIA;
+                break;
+            case "QUENTE":
+                tone = Tonalidade.QUENTE;
+                break;
+            default:
+                tone = Tonalidade.NEUTRA;
+                break;
+        }
+        return tone;
+    }
+
+    /**
+     * Transforma uma string formatada numa SmartBulb.
+     * @param str String
+     * @return SmartBulb
+     */
+    public static SmartBulb parse(String str){
+        String[] tokens = str.split(";");
+        SmartBulb bulb = new SmartBulb();
+        bulb.setIdFabricante(tokens[0]);
+        bulb.setEstado(SmartDevice.parseEstado(tokens[1]));
+        bulb.setPrecoInstalacao(Double.parseDouble(tokens[2]));
+        bulb.tonalidade = parseTonalidade(tokens[3]);
+        bulb.dimensao = Double.parseDouble(tokens[4]);
+
+        return bulb;
+    }
+
+    //Métodos de herdados de Object
 
     /**
      * Clona o aparelho.

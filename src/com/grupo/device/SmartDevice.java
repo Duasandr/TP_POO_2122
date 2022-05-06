@@ -1,5 +1,7 @@
 package com.grupo.device;
 
+import java.util.Locale;
+
 /**
  * Classe SmartDevice
  */
@@ -126,6 +128,10 @@ public abstract class SmartDevice {
      */
     public boolean estaLigado(){
         return this.estado == Estado.LIGADO;
+    }
+
+    public static Estado parseEstado(String str){
+        return str.toUpperCase(Locale.ROOT).equals("LIGADO") ? Estado.LIGADO : Estado.DESLIGADO;
     }
 
     /**

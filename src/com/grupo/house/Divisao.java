@@ -7,7 +7,7 @@ import java.util.*;
 public class Divisao {
     //Variáveis de instância
     private String nome;
-    private HashMap<String,SmartDevice> aparelhos;
+    private Map<String,SmartDevice> aparelhos;
     private double consumo_energia;
 
     //Construtores
@@ -16,6 +16,7 @@ public class Divisao {
      * Construtor vazio
      */
     public Divisao(){
+        this.aparelhos = new HashMap<>();
     }
 
     /**
@@ -24,8 +25,8 @@ public class Divisao {
      * @param aparelhos Aparelhos presentes na divisão.
      */
     public Divisao(String nome , Collection<SmartDevice> aparelhos){
+        this();
         this.nome = nome;
-        this.aparelhos = new HashMap<>();
         this.setAparelhos(aparelhos);
     }
 

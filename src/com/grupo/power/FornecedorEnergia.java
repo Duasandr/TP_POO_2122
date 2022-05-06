@@ -1,5 +1,8 @@
 package com.grupo.power;
 
+import com.grupo.comparators.FaturaPorId;
+import com.grupo.house.Casa;
+
 import java.util.*;
 
 public class FornecedorEnergia {
@@ -8,9 +11,14 @@ public class FornecedorEnergia {
     private String nome;
     private double valor_base;
     private double imposto;
-    private FuncaoDesconto funcao_desconto;
-    private TreeSet<Long> faturas;
+    private FuncaoConsumo funcao_consumo;
+    private Set<Fatura> faturas;
     private double faturacao;
+
+    //Variáveis de classe
+
+    private static final double valor_base_por_omissao = 0.13;
+    private static final double imposto_por_omissao = 0.06;
 
     //Construtores
 
@@ -18,117 +26,184 @@ public class FornecedorEnergia {
      * Construtor vazio.
      */
     public FornecedorEnergia(){
+        this.faturas = new TreeSet<>(new FaturaPorId());
     }
 
     /**
-     * Contrutor por parâmetros.
-     * @param nome Nome do fornecedor.
-     * @param valor_base Valor base por kilowat
+     * Construtor por parâmetros.
+     * @param nome Nome do fornecedor
+     * @param valor_base Preço por kw
      * @param imposto Imposto
-     * @param funcao_desconto Função que calcula o desconto a efetiar.
+     * @param funcao_consumo Função que calcula o consumo
+     * @param faturas Faturas
      */
-    public FornecedorEnergia(String nome , double valor_base , double imposto , FuncaoDesconto funcao_desconto){
+    public FornecedorEnergia(String nome , double valor_base , double imposto , FuncaoConsumo funcao_consumo,Collection<Fatura> faturas){
         this.nome = nome;
         this.valor_base = valor_base;
         this.imposto = imposto;
-        this.funcao_desconto = funcao_desconto;
-        this.faturas = new TreeSet<>();
+        this.funcao_consumo = funcao_consumo;
+        this.setFaturas(faturas);
+    }
+
+    /**
+     * Construtor por parâmetros.
+     * @param nome Nome do fornecedor.
+     * @param valor_base Valor base por kilowat
+     * @param imposto Imposto
+     * @param funcao_consumo Função que calcula o valor total a pagar.
+     */
+    public FornecedorEnergia(String nome , double valor_base , double imposto , FuncaoConsumo funcao_consumo){
+        this();
+        this.nome = nome;
+        this.valor_base = valor_base;
+        this.imposto = imposto;
+        this.funcao_consumo = funcao_consumo;
     }
 
     /**
      * Construtor por cópia.
-     * @param fornecedor
+     * @param fornecedor Cópia
      */
     public FornecedorEnergia(FornecedorEnergia fornecedor){
-        this(fornecedor.nome, fornecedor.valor_base, fornecedor.imposto,fornecedor.funcao_desconto);
+        this(fornecedor.nome, fornecedor.valor_base, fornecedor.imposto,fornecedor.funcao_consumo,fornecedor.faturas);
     }
 
     //Getters
 
     /**
-     *
-     * @return
+     * Devolve o nome do fornecedor.
+     * @return String Nome
      */
     public String getNome() {
         return this.nome;
     }
 
     /**
-     *
-     * @return
+     * Devolve o preço base por kw.
+     * @return double Valor base.
      */
     public double getValorBase() {
         return this.valor_base;
     }
 
     /**
-     *
-     * @return
+     * Devolve o imposto.
+     * @return double Imposto
      */
     public double getImposto() {
         return imposto;
     }
 
-    public Long[] getFaturas() {
-        return this.faturas.toArray(Long[]::new);
+    /**
+     * Devolve o conjunto de faturas.
+     * @return Faturas
+     */
+    public Set<Fatura> getFaturas() {
+        Set<Fatura> copia = new TreeSet<>(new FaturaPorId());
+        for (Fatura fatura : this.faturas) {
+            copia.add(fatura.clone());
+        }
+        return copia;
     }
 
+    /**
+     * Devolve o total faturado.
+     * @return double Faturação.
+     */
     public double getFaturacao(){
         return this.faturacao;
     }
 
-
     //Setters
 
     /**
-     *
-     * @param nome
+     * Define o nome do fornecedor.
+     * @param nome String Nome
      */
     public void setNome(String nome) {
         this.nome = nome;
     }
 
     /**
-     *
-     * @param valor_base
+     * Define o valor base por kw.
+     * @param valor_base Preço kw
      */
     public void setValorBase(double valor_base) {
         this.valor_base = valor_base;
     }
 
     /**
-     *
-     * @param imposto
+     * Define o imposto.
+     * @param imposto double Imposto
      */
     public void setImposto(double imposto) {
         this.imposto = imposto;
     }
 
     /**
-     *
-     * @param funcao_desconto
+     * Define a função de consumo.
+     * @param funcao_consumo Função consumo a aplicar.
      */
-    public void setFuncaoDesconto(FuncaoDesconto funcao_desconto) {
-        this.funcao_desconto = funcao_desconto;
+    public void setFuncaoConsumo(FuncaoConsumo funcao_consumo) {
+        this.funcao_consumo = funcao_consumo;
+    }
+
+    /**
+     * Define as faturas do fornecedor.
+     * @param faturas Faturas a utilizar
+     */
+    public void setFaturas(Collection<Fatura> faturas){
+        this.faturacao = 0;
+        this.faturas = new TreeSet<>(new FaturaPorId());
+        for (Fatura fatura : faturas) {
+            this.guardaFatura(fatura);
+        }
+    }
+
+    /**
+     * Define a atual faturação do fornecedor
+     * @param faturacao Faturação total
+     */
+    public void setFaturacao(double faturacao){
+        this.faturacao = faturacao;
     }
 
     //Métodos de instância
 
-    public double calculaDesconto(double consumo , int aparelhos){
-        return funcao_desconto.descontoPorDia(consumo,aparelhos);
+    /**
+     * Devolve o total consumo de energia de uma casa a pagar.
+     * @param casa Casa
+     * @return double Total a pagar.
+     */
+    public double calculaValorPagar(Casa casa){
+        return this.funcao_consumo.calculaTotalPagar(casa,this);
     }
-
-    public void guardaFatura(long id , double valor){
-        this.faturacao += valor;
-        this.faturas.add(id);
-    }
-
-    //Métodos Object
 
     /**
-     *
-     * @param o
-     * @return
+     * Guarda uma fatura emitida e atualiza o valor da faturação.
+     * @param fatura Fatura
+     */
+    public void guardaFatura(Fatura fatura){
+        this.faturacao += fatura.getTotalConsumo();
+        this.faturas.add(fatura.clone());
+    }
+
+    /**
+     * Transforma uma string num objeto do tipo FOrnecedorEnergia passando como parâmetros valores por omissão.
+     * @param str Nome do fornecedor
+     * @return FornecedorEnergia Uma nova instância de Fornecedor
+     */
+    public FornecedorEnergia parse(String str){
+        String[] tokens = str.split(";");
+        return new FornecedorEnergia(str,valor_base_por_omissao,imposto_por_omissao,new FuncaoConsumoPadrao());
+    }
+
+    //Métodos herdados de Object
+
+    /**
+     * Compara a instância com um objeto.
+     * @param o Objeto a comparar
+     * @return true - false
      */
     @Override
     public boolean equals(Object o) {
@@ -141,8 +216,8 @@ public class FornecedorEnergia {
     }
 
     /**
-     *
-     * @return
+     * Cria uma cópia da instância.
+     * @return Cópia
      */
     @Override
     public FornecedorEnergia clone(){
@@ -150,8 +225,8 @@ public class FornecedorEnergia {
     }
 
     /**
-     *
-     * @return
+     * Representação textual do fornecedor.
+     * @return String
      */
     @Override
     public String toString() {
@@ -159,17 +234,15 @@ public class FornecedorEnergia {
         sb.append("nome='").append(nome).append('\'');
         sb.append(", valor_base=").append(valor_base);
         sb.append(", imposto=").append(imposto);
-        sb.append(", funcao_desconto=").append(funcao_desconto);
+        sb.append(", funcao_consumo=").append(funcao_consumo.toString());
+        sb.append(", faturas=").append(faturas);
+        sb.append(", faturacao=").append(faturacao);
         sb.append('}');
         return sb.toString();
     }
 
-    /**
-     *
-     * @return
-     */
     @Override
     public int hashCode() {
-        return Objects.hash(nome);
+        return Objects.hash(nome, valor_base, imposto, funcao_consumo, faturas, faturacao);
     }
 }
