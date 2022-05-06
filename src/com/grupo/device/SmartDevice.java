@@ -6,73 +6,81 @@ import java.util.Locale;
  * Classe SmartDevice
  */
 public abstract class SmartDevice {
-   //Variáveis de instância
-   private String id;
-   private Estado estado;
-   private double preco_instalacao;
+    //Variáveis de instância
+    private String id;
+    private Estado estado;
+    private double preco_instalacao;
 
-   //Variáveis de classe
-   public enum Estado {
-       DESLIGADO ,
-       LIGADO
-   }
+    //Variáveis de classe
+    public enum Estado {
+        DESLIGADO,
+        LIGADO
+    }
 
-   //Construtores
+    //Construtores
 
     /**
      * Construtor vazio
      */
-    public SmartDevice(){}
+    public SmartDevice() {
+    }
 
     /**
      * Construtor por parâmetros.
-     * @param id Identificador do fabricante
+     *
+     * @param id     Identificador do fabricante
      * @param estado Estado atual do aparelho (ligado — desligado)
-     * @param preco Preço de instalação definido pelo fabricante.
+     * @param preco  Preço de instalação definido pelo fabricante.
      */
-   public SmartDevice(String id , Estado estado , double preco){
+    public SmartDevice(String id, Estado estado, double preco) {
         this.id = id;
         this.estado = estado;
         this.preco_instalacao = preco;
-   }
+    }
 
     /**
      * Construtor por cópia.
+     *
      * @param device Aparelho a ser copiado.
      */
-   public SmartDevice(SmartDevice device){
+    public SmartDevice(SmartDevice device) {
         this(device.id, device.estado, device.preco_instalacao);
-   }
+    }
 
-   //Métodos de instância
+    //Métodos de instância
 
-   //Getters
+    //Getters
+
     /**
      * Devolve o identificador do aparelho emitido pelo fabricante.
+     *
      * @return String Identificador.
      */
-   public String getIdFabricante(){
-       return this.id;
-   }
+    public String getIdFabricante() {
+        return this.id;
+    }
 
     /**
      * Devolve o estado atual do aparelho.
+     *
      * @return Estado do aparelho (ligado — desligado)
      */
-   public Estado getEstado(){
-       return this.estado;
-   }
+    public Estado getEstado() {
+        return this.estado;
+    }
 
     /**
      * Devolve o preço de intalação definido pelo fabricante.
+     *
      * @return Preço de instalação.
      */
-    public double getPrecoInstalacao(){
+    public double getPrecoInstalacao() {
         return this.preco_instalacao;
     }
 
     /**
      * Devolve o consumo de energia que do aparelho.
+     *
      * @return Energia consumida pelo aparelho.
      */
     public abstract double getConsumoEnergia();
@@ -81,27 +89,30 @@ public abstract class SmartDevice {
 
     /**
      * Define o identificador do aparelho.
+     *
      * @param id Identificador
      */
-    public void setIdFabricante(String id){
+    public void setIdFabricante(String id) {
         this.id = id;
     }
 
     /**
      * Define o estado do aparelho.
+     *
      * @param estado Estado do aparelho (ligado — desligado).
      */
-    public void setEstado(Estado estado){
-        if(estado != null) {
-          this.estado = estado;
+    public void setEstado(Estado estado) {
+        if (estado != null) {
+            this.estado = estado;
         }
     }
 
     /**
      * Define o preço de instalação do aparelho.
+     *
      * @param preco Preço de instalação.
      */
-    public void setPrecoInstalacao(double preco){
+    public void setPrecoInstalacao(double preco) {
         this.preco_instalacao = preco;
     }
 
@@ -124,9 +135,10 @@ public abstract class SmartDevice {
 
     /**
      * Testa se o aparelho está ligado
+     *
      * @return true - false
      */
-    public boolean estaLigado(){
+    public boolean estaLigado() {
         return this.estado == Estado.LIGADO;
     }
 
@@ -136,6 +148,7 @@ public abstract class SmartDevice {
 
     /**
      * Clona o aparelho.
+     *
      * @return Aparelho clonado.
      */
     @Override
@@ -143,6 +156,7 @@ public abstract class SmartDevice {
 
     /**
      * Verifica se dois objetos são iguais.
+     *
      * @param o Objeto a comparar.
      * @return Verdadeiro ou falso.
      */
@@ -151,6 +165,7 @@ public abstract class SmartDevice {
 
     /**
      * Devolve uma representação textual do objeto.
+     *
      * @return Representação do objeto.
      */
     @Override
@@ -165,6 +180,7 @@ public abstract class SmartDevice {
 
     /**
      * Cria um indice através de uma função de hash.
+     *
      * @return Indice
      */
     @Override

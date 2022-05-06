@@ -12,30 +12,32 @@ public class SmartCamera extends SmartDevice {
     /**
      * Construtor vazio
      */
-    protected SmartCamera(){
+    protected SmartCamera() {
 
     }
 
     /**
      * Construtor por paâmetros
-     * @param id Identificador do dispositivo
-     * @param estado Estado do dispositivo
+     *
+     * @param id               Identificador do dispositivo
+     * @param estado           Estado do dispositivo
      * @param preco_instalacao Preço de instalação
-     * @param res Resolução da imagem
+     * @param res              Resolução da imagem
      * @param tamanho_ficheiro Tamanho do ficheiro de gravação
      */
-    protected SmartCamera(String id , Estado estado , double preco_instalacao , int res , double tamanho_ficheiro){
-        super(id,estado,preco_instalacao);
+    protected SmartCamera(String id, Estado estado, double preco_instalacao, int res, double tamanho_ficheiro) {
+        super(id, estado, preco_instalacao);
         this.resolucao = res;
         this.tamanho_ficheiro = tamanho_ficheiro;
     }
 
     /**
      * Construtor por cópia.
+     *
      * @param cam Camera a copiar
      */
-    protected SmartCamera(SmartCamera cam){
-        this(cam.getIdFabricante(),cam.getEstado(), cam.getPrecoInstalacao(), cam.resolucao, cam.tamanho_ficheiro);
+    protected SmartCamera(SmartCamera cam) {
+        this(cam.getIdFabricante(), cam.getEstado(), cam.getPrecoInstalacao(), cam.resolucao, cam.tamanho_ficheiro);
     }
 
     //Métodos de instância
@@ -44,17 +46,19 @@ public class SmartCamera extends SmartDevice {
 
     /**
      * Devolve a resolução de imagem.
+     *
      * @return double Resolução.
      */
-    public int getResolucao(){
+    public int getResolucao() {
         return this.resolucao;
     }
 
     /**
      * Devolve o tamanho do ficheiro de gravação.
+     *
      * @return double Tamanho do ficheiro.
      */
-    public double getTamanhoFicheiro(){
+    public double getTamanhoFicheiro() {
         return this.tamanho_ficheiro;
     }
 
@@ -62,35 +66,57 @@ public class SmartCamera extends SmartDevice {
 
     /**
      * Define a resolução de imagem.
+     *
      * @param res resolução de imagem.
      */
-    public void setResolucao(int res){
+    public void setResolucao(int res) {
         this.resolucao = res;
     }
 
     /**
      * Define o tamanho do ficheiro de gravação.
+     *
      * @param tamanho_ficheiro tamanho do ficheiro.
      */
-    public void setTamanhoFicheiro(Double tamanho_ficheiro){
+    public void setTamanhoFicheiro(Double tamanho_ficheiro) {
         this.tamanho_ficheiro = tamanho_ficheiro;
     }
 
     /**
      * Devolve o consumo de energia do aparelho.
+     *
      * @return double Consumo de energia em watts
      */
     @Override
     public double getConsumoEnergia() {
         double consumo = 0.0;
-        if(this.getEstado() == Estado.LIGADO){
+        if (this.getEstado() == Estado.LIGADO) {
             consumo = this.tamanho_ficheiro * this.resolucao;
         }
         return consumo;
     }
 
     /**
+     * Transforma uma String formatada numa SmartCamera.
+     *
+     * @param str String.
+     * @return SmartCamera.
+     */
+    public static SmartCamera parse(String str) {
+        String[] tokens = str.split(";");
+        SmartCamera camera = new SmartCamera();
+        camera.setIdFabricante(tokens[0]);
+        camera.setEstado(SmartDevice.parseEstado(tokens[1]));
+        camera.setPrecoInstalacao(Double.parseDouble(tokens[2]));
+        camera.resolucao = Integer.parseInt(tokens[3]);
+        camera.tamanho_ficheiro = Double.parseDouble(tokens[4]);
+
+        return camera;
+    }
+
+    /**
      * Devolve uma cópia da camera.
+     *
      * @return Cópia da camera.
      */
     @Override
@@ -100,6 +126,7 @@ public class SmartCamera extends SmartDevice {
 
     /**
      * Compara um objeto com a camera.
+     *
      * @param o Objeto a comparar.
      * @return true , false
      */
@@ -113,6 +140,7 @@ public class SmartCamera extends SmartDevice {
 
     /**
      * Representação textual do objeto.
+     *
      * @return String
      */
     @Override
@@ -126,6 +154,7 @@ public class SmartCamera extends SmartDevice {
 
     /**
      * Devolve um hascode associado ao objeto.
+     *
      * @return int HashCode
      */
     @Override

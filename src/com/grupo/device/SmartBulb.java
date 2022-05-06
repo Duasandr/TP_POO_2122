@@ -111,9 +111,9 @@ public class SmartBulb extends SmartDevice implements Serializable {
         double consumo = 0.0;
         if (this.getEstado() == Estado.LIGADO) {
             switch (this.tonalidade) {
-                case FRIA -> consumo = valor_fixo + this.getDimensao() * 1.2;
-                case NEUTRA -> consumo = valor_fixo + this.getDimensao() * 1;
-                case QUENTE -> consumo = valor_fixo + this.getDimensao() * 1.4;
+                case FRIA -> consumo = valor_fixo + this.dimensao * 1.2;
+                case NEUTRA -> consumo = valor_fixo + this.dimensao * 1;
+                case QUENTE -> consumo = valor_fixo + this.dimensao * 1.4;
             }
         }
         return consumo;
