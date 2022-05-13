@@ -1,5 +1,6 @@
 package com.grupo.house;
 
+import exceptions.LinhaFormatadaInvalidaException;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -107,7 +108,7 @@ class CasaTest {
     }
 
     @Test
-    void parse() {
+    void parse() throws LinhaFormatadaInvalidaException {
         Casa casa = Casa.parse("Rua 31 de Janeiro;Joel Barros;EDP;12345{Sala[Bulb:12345;ligado;12.00;fria;12.0 Bulb:8927;ligado;12.00;fria;12.0|Quarto[Bulb:12345;ligado;12.00;fria;12.0 Bulb:8927;ligado;12.00;fria;12.0");
         System.out.println(casa);
     }

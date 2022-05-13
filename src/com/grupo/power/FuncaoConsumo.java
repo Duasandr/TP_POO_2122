@@ -2,9 +2,10 @@ package com.grupo.power;
 
 import com.grupo.house.Casa;
 
+import java.io.Serializable;
 import java.util.Locale;
 
-public abstract class FuncaoConsumo {
+public abstract class FuncaoConsumo implements Serializable {
     /**
      * Função abstrata que permite calcular o total a pagar de um consumo de uma casa
      * @return total a pagar

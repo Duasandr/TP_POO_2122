@@ -1,5 +1,6 @@
 package com.grupo.house;
 
+import exceptions.LinhaFormatadaInvalidaException;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -63,7 +64,7 @@ class DivisaoTest {
     }
 
     @Test
-    void testParse(){
+    void testParse() throws LinhaFormatadaInvalidaException {
         Divisao divisao = Divisao.parse("Sala[Speaker:12345;desligado;12.00;25;MEGA;100 Camera:8927;ligado;12.00;1024;50.0");
         System.out.println(divisao);
     }

@@ -1,14 +1,16 @@
 package com.grupo.house;
 
 import com.grupo.device.SmartDevice;
+import exceptions.DispositivoNaoExisteException;
+import exceptions.LinhaFormatadaInvalidaException;
 
+import java.io.Serializable;
 import java.util.*;
 
-public class Divisao {
+public class Divisao implements Serializable {
     //Variáveis de instância
     private String nome;
     private Map<String,SmartDevice> aparelhos;
-    private double consumo_energia;
 
     //Construtores
 
@@ -58,22 +60,11 @@ public class Divisao {
         if(aparelhos != null) {
             HashMap<String, SmartDevice> clone = new HashMap<>(aparelhos.size());
 
-            this.consumo_energia = 0;
             for (SmartDevice aparelho : aparelhos) {
                 clone.put(aparelho.getIdFabricante(), aparelho.clone());
-                this.consumo_energia += aparelho.getConsumoEnergia();
             }
             this.aparelhos = clone;
         }
-    }
-
-    /**
-     * Define o consumo de energia da divisão.
-     *
-     * @param consumo Consumo a definir.
-     */
-    private void setConsumoEnergia(double consumo){
-        this.consumo_energia = consumo;
     }
 
     //Getters
@@ -104,7 +95,11 @@ public class Divisao {
      * @return Consumo de energia.
      */
     public double getConsumoEnergia(){
-        return this.consumo_energia;
+        double consumo = 0.0;
+        for (SmartDevice device : this.aparelhos.values()) {
+            consumo += device.getConsumoEnergia();
+        }
+        return consumo;
     }
 
     public int getNumeroDispositivos(){
@@ -116,64 +111,66 @@ public class Divisao {
     /**
      * Verifica se um aparelho existe na divisão.
      *
-     * @param id Identificador do aparelho.
+     * @param id_dispositivo Identificador do aparelho.
      * @return true - false
      */
-    protected boolean existeAparelho(String id){
-        return this.aparelhos.containsKey(id);
+    public boolean contem(String id_dispositivo){
+        return this.aparelhos.containsKey(id_dispositivo);
     }
 
-    //Métodos de interface
+    //Métodos de instância
 
     /**
-     * Liga todos os aparelhos presentes na divisão.
+     * Altera todos os estados de todos os dispositivos da divisão.
+     * @param novo_estado Novo estado a atribuir aos dispositivos.
      */
-    public void ligaTodosDispositivos(){
-        this.consumo_energia = 0;
+    public void alteraEstado(SmartDevice.Estado novo_estado){
         for (SmartDevice aparelho : this.aparelhos.values()) {
-            aparelho.ligar();
-            this.consumo_energia += aparelho.getConsumoEnergia();
+            aparelho.setEstado(novo_estado);
         }
     }
 
     /**
-     * Desliga todos os aparelhos presentes na divisão.
+     * Altera o estado de um dispositivo em específico.
+     * @param id_dispositivo Identificador do dispositivo.
+     * @param novo_estado Novo estado a atribuir ao dispositivo.
+     * @throws DispositivoNaoExisteException Acontece quando não existe um dispositivo.
      */
-    public void desligaTodosDispositivos(){
-        for (SmartDevice aparelho : this.aparelhos.values()) {
-            aparelho.desligar();
+    public void alteraEstado(String id_dispositivo , SmartDevice.Estado novo_estado) throws DispositivoNaoExisteException {
+        if(contem(id_dispositivo)){
+            this.aparelhos.get(id_dispositivo).setEstado(novo_estado);
+        }else{
+            throw new DispositivoNaoExisteException();
         }
-        this.consumo_energia = 0;
     }
 
+    //Métodos de classe
+
     /**
-     * Liga um aparelho em específico.
-     *
-     * @param id Identificador do aparelho.
+     * Transforma uma linha de texto formatada numa nova divisão.
+     * @param str String formatada
+     * @return Divisao nova
+     * @throws LinhaFormatadaInvalidaException Acontece quando a linha de texto está mal formatada.
      */
-    public void ligaDispositivo(String id){
-        if(existeAparelho(id)){
-            SmartDevice aparelho = this.aparelhos.get(id);
-            if(!aparelho.estaLigado()){
-                aparelho.ligar();
-                this.consumo_energia += aparelho.getConsumoEnergia();
+    public static Divisao parse(String str) throws LinhaFormatadaInvalidaException {
+        String[] tokens = str.split("\\[");
+        String[] str_dispositivos = tokens[1].split(" ");
+        Divisao divisao = new Divisao();
+
+        if(tokens.length == 2) {
+            Set<SmartDevice> dispositivos = new HashSet<>(str_dispositivos.length);
+
+            for (String disp : str_dispositivos) {
+                dispositivos.add(SmartDevice.parse(disp));
             }
-        }
-    }
 
-    /**
-     * Desliga um aparelho em específico.
-     *
-     * @param id Identificador do aparelho.
-     */
-    public void desligaDispositivo(String id){
-        if(existeAparelho(id)){
-            SmartDevice aparelho = this.aparelhos.get(id);
-            if(aparelho.estaLigado()){
-                this.consumo_energia -= aparelho.getConsumoEnergia();
-                aparelho.desligar();
-            }
+            divisao.setNome(tokens[0]);
+            divisao.setAparelhos(dispositivos);
+        }else{
+            throw new LinhaFormatadaInvalidaException(str);
         }
+
+        return divisao;
     }
 
     /**
@@ -195,7 +192,6 @@ public class Divisao {
         final StringBuilder sb = new StringBuilder("Divisao{");
         sb.append("nome='").append(nome).append('\'');
         sb.append(", aparelhos=").append(aparelhos);
-        sb.append(", consumo_energia=").append(consumo_energia);
         sb.append('}');
         return sb.toString();
     }
@@ -211,8 +207,7 @@ public class Divisao {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Divisao divisao = (Divisao) o;
-        return Double.compare(divisao.consumo_energia, consumo_energia) == 0 &&
-                Objects.equals(nome, divisao.nome) &&
+        return Objects.equals(nome, divisao.nome) &&
                 Objects.equals(aparelhos, divisao.aparelhos);
     }
 
@@ -224,21 +219,5 @@ public class Divisao {
     @Override
     public int hashCode() {
         return Objects.hash(nome);
-    }
-
-    public static Divisao parse(String str){
-        String[] tokens = str.split("\\[");
-        String[] str_dispositivos = tokens[1].split(" ");
-        Divisao divisao = new Divisao();
-        Set<SmartDevice> dispositivos = new HashSet<>(str_dispositivos.length);
-
-        for (String disp : str_dispositivos) {
-            dispositivos.add(SmartDevice.parse(disp));
-        }
-
-        divisao.setNome(tokens[0]);
-        divisao.setAparelhos(dispositivos);
-
-        return divisao;
     }
 }

@@ -1,8 +1,9 @@
 package com.grupo.device;
 
+import java.io.Serializable;
 import java.util.Objects;
 
-public class SmartCamera extends SmartDevice {
+public class SmartCamera extends SmartDevice implements Serializable {
     //Variáveis de instância
     private int resolucao;
     private double tamanho_ficheiro;

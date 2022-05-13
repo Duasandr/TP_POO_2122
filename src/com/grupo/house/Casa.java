@@ -1,21 +1,23 @@
 package com.grupo.house;
 
 import com.grupo.device.SmartDevice;
+import exceptions.DispositivoNaoExisteException;
+import exceptions.DivisaoInexistenteException;
+import exceptions.LinhaFormatadaInvalidaException;
 
+import java.io.Serializable;
 import java.util.*;
 
 
-public class Casa {
+public class Casa implements Serializable {
     //Variáveis de instância
 
     private String morada;
     private String proprietario;
     private String fornecedor;
     private int nif_proprietario;
-    private HashMap<String , Divisao> divisoes;
-    private int numero_dispositivos;
-    private double consumo_energia;
-    private TreeSet<Long> faturas;
+    private Map<String , Divisao> divisoes;
+    private Set<Long> id_faturas;
 
     //Construtores
 
@@ -31,18 +33,19 @@ public class Casa {
      * @param nif_proprietario Número de identificação fiscal do proprietário.
      * @param divisoes Divisões da casa.
      */
-    public Casa(String proprietario,String morada , int nif_proprietario , Collection<Divisao> divisoes , String fornecedor){
+    public Casa(String proprietario,String morada , int nif_proprietario , Collection<Divisao> divisoes , String fornecedor , Set<Long> id_faturas){
         this.proprietario = proprietario;
         this.nif_proprietario = nif_proprietario;
         this.fornecedor = fornecedor;
         this.morada = morada;
         this.divisoes = new HashMap<>();
-        this.faturas = new TreeSet<>();
+        this.id_faturas = new TreeSet<>();
         this.setDivisoes(divisoes);
+        this.setFaturas(id_faturas);
     }
 
     public Casa(Casa casa){
-        this(casa.proprietario , casa.morada, casa.nif_proprietario, casa.divisoes.values(), casa.fornecedor);
+        this(casa.proprietario , casa.morada, casa.nif_proprietario, casa.divisoes.values(), casa.fornecedor , casa.id_faturas);
     }
 
     //Métodos de instância
@@ -89,31 +92,16 @@ public class Casa {
         if(divisoes != null) {
             HashMap<String, Divisao> copia = new HashMap<>(divisoes.size());
 
-            this.numero_dispositivos = 0;
-            this.consumo_energia = 0;
             for (Divisao divisao : divisoes) {
                 copia.put(divisao.getNome(), divisao.clone());
-                numero_dispositivos += divisao.getNumeroDispositivos();
-                consumo_energia += divisao.getConsumoEnergia();
             }
             this.divisoes = copia;
         }
     }
 
-    /**
-     * Define o número de dispositivos da casa.
-     * @param numero_dispositivos Número de dispositivos.
-     */
-    public void setNumeroDispositivos(int numero_dispositivos) {
-        this.numero_dispositivos = numero_dispositivos;
-    }
-
-    /**
-     * Define o consumo de energia da casa.
-     * @param consumo_energia consumo de energia em watts.
-     */
-    public void setConsumoEnergia(double consumo_energia) {
-        this.consumo_energia = consumo_energia;
+    public void setFaturas(Collection<Long> id_faturas){
+        this.id_faturas = new TreeSet<>();
+        this.id_faturas.addAll(id_faturas);
     }
 
     //Getters
@@ -162,7 +150,11 @@ public class Casa {
      * @return Número de dispositivos
      */
     public int getNumeroDispositivos(){
-        return this.numero_dispositivos;
+        int total = 0;
+        for (Divisao divisao : this.divisoes.values()) {
+            total += divisao.getNumeroDispositivos();
+        }
+        return total;
     }
 
     /**
@@ -170,7 +162,11 @@ public class Casa {
      * @return Energia gasta em watts.
      */
     public double getConsumoEnergia(){
-        return this.consumo_energia;
+        double consumo = 0.0;
+        for (Divisao divisao : this.divisoes.values()) {
+            consumo += divisao.getConsumoEnergia();
+        }
+        return consumo;
     }
 
     /**
@@ -185,8 +181,8 @@ public class Casa {
      * Devolve um array com os identificadores de faturas emitidas
      * @return Array de faturas emitidas.
      */
-    public Long[] getFaturas(){
-        return this.faturas.toArray(Long[]::new);
+    public Set<Long> getFaturas(){
+        return new TreeSet<>(this.id_faturas);
     }
 
     //Métodos auxiliares
@@ -204,85 +200,65 @@ public class Casa {
     /**
      * Devolve o nome da divisão onde se encontra o aparelho.
      *
-     * @param id Identificador do aparelho.
-     * @return Nome da divisão ou null caso não exista o aparelho.
+     * @param id_dispositivo Identificador do aparelho.
+     * @return  Divisão ou null caso não exista o aparelho.
      */
-    private String divisaoDoAparelho(String id){
+    private Divisao ondeEsta(String id_dispositivo){
         boolean found = false;
         Divisao divisao = null;
 
         Iterator<Divisao> i = this.divisoes.values().iterator();
         while(i.hasNext() && !found){
             divisao = i.next();
-            found = divisao.existeAparelho(id);
+            found = divisao.contem(id_dispositivo);
         }
-        return found ? divisao.getNome() : null;
+        return divisao;
     }
 
-    //Métodos de interface
+    //Métodos de instância
 
     /**
-     * Liga todos os dispositivos de uma divisão da casa.
-     *
-     * @param nome Nome da divisão.
+     * Altera todos os estados de todos os dispositivos da divisão.
+     * @param novo_estado Novo estado a atribuir aos dispositivos.
      */
-    public void ligarTodosDispositivos(String nome) {
-        if(existeDivisao(nome)){
-            Divisao divisao = this.divisoes.get(nome);
-            divisao.ligaTodosDispositivos();
-            this.consumo_energia += divisao.getConsumoEnergia();
+    public void alteraEstado(SmartDevice.Estado novo_estado){
+        for (Divisao divisao : this.divisoes.values()) {
+            divisao.alteraEstado(novo_estado);
         }
     }
 
     /**
-     * Desliga todos os dispositivos de uma divisão da casa.
-     *
-     * @param nome Nome da divisão.
+     * Altera todos os estados de todos os dispositivos da divisão.
+     * @param novo_estado Novo estado a atribuir aos dispositivos.
      */
-    public void desligarTodosDispositivos(String nome) {
-        if(existeDivisao(nome)){
-            Divisao divisao = this.divisoes.get(nome);
-            this.consumo_energia -= divisao.getConsumoEnergia();
-            divisao.desligaTodosDispositivos();
+    public void alteraEstadoDivisao(String divisao , SmartDevice.Estado novo_estado) throws DivisaoInexistenteException {
+        if(this.divisoes.containsKey(divisao)){
+            this.divisoes.get(divisao).alteraEstado(novo_estado);
+        }else{
+            throw new DivisaoInexistenteException();
         }
     }
 
     /**
-     * Liga um aparelho em específico.
-     * @param id Identificador do aparelho.
+     * Altera o estado de um dispositivo em específico.
+     * @param id_dispositivo Identificador do dispositivo.
+     * @param novo_estado Novo estado a atribuir ao dispositivo.
+     * @throws DispositivoNaoExisteException Acontece quando não existe um dispositivo.
      */
-    public void ligarDispositivo(String id) {
-        String local = divisaoDoAparelho(id);
+    public void alteraEstado(String id_dispositivo , SmartDevice.Estado novo_estado) throws DispositivoNaoExisteException {
+        Divisao local = ondeEsta(id_dispositivo);
         if(local != null){
-            Divisao divisao = this.divisoes.get(local);
-
-            this.consumo_energia -= divisao.getConsumoEnergia();
-            divisao.ligaDispositivo(id);
-            this.consumo_energia += divisao.getConsumoEnergia();
+            local.alteraEstado(id_dispositivo,novo_estado);
+        }else{
+            throw new DispositivoNaoExisteException();
         }
     }
 
     /**
-     * Desliga um aparelho em específico.
-     * @param id Identificador do aparelho.
+     * Guarda o identificador da fatura emitida..
      */
-    public void desligarDispositivo(String id) {
-        String local = divisaoDoAparelho(id);
-        if(local != null){
-            Divisao divisao = this.divisoes.get(local);
-
-            this.consumo_energia -= divisao.getConsumoEnergia();
-            divisao.desligaDispositivo(id);
-            this.consumo_energia += divisao.getConsumoEnergia();
-        }
-    }
-
-    /**
-     * Guarda o identificador da fatura emitida.
-     * @param id Identificador da fatura.
-     */
-    public void guardaFatura(long id){
-        this.faturas.add(id);
+    public void guardaFatura(long id_fatura){
+        this.id_faturas.add(id_fatura);
     }
 
     /**
@@ -290,7 +266,7 @@ public class Casa {
      * @return Identificador da última fatura.
      */
     public long ultimaFatura(){
-        return this.faturas.last();
+        return ((TreeSet<Long>)this.id_faturas).last();
     }
 
     //Métodos de Object
@@ -307,7 +283,6 @@ public class Casa {
         if (o == null || getClass() != o.getClass()) return false;
         Casa casa = (Casa) o;
         return this.nif_proprietario == casa.nif_proprietario &&
-                this.numero_dispositivos == casa.numero_dispositivos &&
                 this.morada.equals(casa.morada) &&
                 this.proprietario.equals(casa.proprietario) &&
                 this.divisoes.equals(casa.divisoes);
@@ -333,7 +308,6 @@ public class Casa {
         sb.append(", proprietario='").append(proprietario).append('\'');
         sb.append(", nif_proprietario=").append(nif_proprietario);
         sb.append(", divisoes=").append(divisoes);
-        sb.append(", numero_dispositivos=").append(numero_dispositivos);
         sb.append('}');
         return sb.toString();
     }
@@ -343,23 +317,28 @@ public class Casa {
         return Objects.hash(proprietario, nif_proprietario , morada);
     }
 
-    public static Casa parse(String str){
+    public static Casa parse(String str) throws LinhaFormatadaInvalidaException {
         String[] tokens = str.split("\\{");
         String[] tokens_casa = tokens[0].split(";");
         String[] tokens_divisoes = tokens[1].split("\\|");
         Casa casa = new Casa();
-        casa.morada = tokens_casa[0];
-        casa.proprietario = tokens_casa[1];
-        casa.fornecedor = tokens_casa[2];
-        casa.nif_proprietario = Integer.parseInt(tokens_casa[3]);
 
-        Set<Divisao> divisoes = new HashSet<>();
+        if(tokens.length == 4) {
+            casa.morada = tokens_casa[0];
+            casa.proprietario = tokens_casa[1];
+            casa.fornecedor = tokens_casa[2];
+            casa.nif_proprietario = Integer.parseInt(tokens_casa[3]);
 
-        for (String divisao : tokens_divisoes) {
-            divisoes.add(Divisao.parse(divisao));
+            Set<Divisao> divisoes = new HashSet<>();
+
+            for (String divisao : tokens_divisoes) {
+                divisoes.add(Divisao.parse(divisao));
+            }
+
+            casa.setDivisoes(divisoes);
+        }else{
+            throw new LinhaFormatadaInvalidaException(str);
         }
-
-        casa.setDivisoes(divisoes);
 
         return casa;
     }

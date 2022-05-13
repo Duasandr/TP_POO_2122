@@ -3,16 +3,16 @@ package com.grupo.power;
 import com.grupo.comparators.FaturaPorId;
 import com.grupo.house.Casa;
 
+import java.io.Serializable;
 import java.util.*;
 
-public class FornecedorEnergia {
+public class FornecedorEnergia implements Serializable {
     //Variáveis de instância
 
     private String nome;
     private double valor_base;
     private double imposto;
     private FuncaoConsumo funcao_consumo;
-    private Set<Fatura> faturas;
     private double faturacao;
 
     //Variáveis de classe
@@ -26,7 +26,7 @@ public class FornecedorEnergia {
      * Construtor vazio.
      */
     public FornecedorEnergia(){
-        this.faturas = new TreeSet<>(new FaturaPorId());
+
     }
 
     /**
@@ -35,14 +35,12 @@ public class FornecedorEnergia {
      * @param valor_base Preço por kw
      * @param imposto Imposto
      * @param funcao_consumo Função que calcula o consumo
-     * @param faturas Faturas
      */
-    public FornecedorEnergia(String nome , double valor_base , double imposto , FuncaoConsumo funcao_consumo,Collection<Fatura> faturas){
+    public FornecedorEnergia(String nome , double valor_base , double imposto , FuncaoConsumo funcao_consumo){
         this.nome = nome;
         this.valor_base = valor_base;
         this.imposto = imposto;
         this.funcao_consumo = funcao_consumo;
-        this.setFaturas(faturas);
     }
 
     /**
@@ -52,12 +50,13 @@ public class FornecedorEnergia {
      * @param imposto Imposto
      * @param funcao_consumo Função que calcula o valor total a pagar.
      */
-    public FornecedorEnergia(String nome , double valor_base , double imposto , FuncaoConsumo funcao_consumo){
+    public FornecedorEnergia(String nome , double valor_base , double imposto , FuncaoConsumo funcao_consumo, double faturacao){
         this();
         this.nome = nome;
         this.valor_base = valor_base;
         this.imposto = imposto;
         this.funcao_consumo = funcao_consumo;
+        this.faturacao = faturacao;
     }
 
     /**
@@ -65,7 +64,7 @@ public class FornecedorEnergia {
      * @param fornecedor Cópia
      */
     public FornecedorEnergia(FornecedorEnergia fornecedor){
-        this(fornecedor.nome, fornecedor.valor_base, fornecedor.imposto,fornecedor.funcao_consumo,fornecedor.faturas);
+        this(fornecedor.nome, fornecedor.valor_base, fornecedor.imposto,fornecedor.funcao_consumo,fornecedor.faturacao);
     }
 
     //Getters
@@ -95,23 +94,15 @@ public class FornecedorEnergia {
     }
 
     /**
-     * Devolve o conjunto de faturas.
-     * @return Faturas
-     */
-    public Set<Fatura> getFaturas() {
-        Set<Fatura> copia = new TreeSet<>(new FaturaPorId());
-        for (Fatura fatura : this.faturas) {
-            copia.add(fatura.clone());
-        }
-        return copia;
-    }
-
-    /**
      * Devolve o total faturado.
      * @return double Faturação.
      */
     public double getFaturacao(){
         return this.faturacao;
+    }
+
+    public FuncaoConsumo getFuncaoConsumo(){
+        return this.funcao_consumo;
     }
 
     //Setters
@@ -149,18 +140,6 @@ public class FornecedorEnergia {
     }
 
     /**
-     * Define as faturas do fornecedor.
-     * @param faturas Faturas a utilizar
-     */
-    public void setFaturas(Collection<Fatura> faturas){
-        this.faturacao = 0;
-        this.faturas = new TreeSet<>(new FaturaPorId());
-        for (Fatura fatura : faturas) {
-            this.guardaFatura(fatura);
-        }
-    }
-
-    /**
      * Define a atual faturação do fornecedor
      * @param faturacao Faturação total
      */
@@ -179,13 +158,8 @@ public class FornecedorEnergia {
         return this.funcao_consumo.calculaTotalPagar(casa,this);
     }
 
-    /**
-     * Guarda uma fatura emitida e atualiza o valor da faturação.
-     * @param fatura Fatura
-     */
-    public void guardaFatura(Fatura fatura){
-        this.faturacao += fatura.getTotalConsumo();
-        this.faturas.add(fatura.clone());
+    public void atualizaFaturacao(double valor){
+        this.faturacao += valor;
     }
 
     /**
@@ -241,7 +215,6 @@ public class FornecedorEnergia {
         sb.append(", valor_base=").append(valor_base);
         sb.append(", imposto=").append(imposto);
         sb.append(", funcao_consumo=").append(funcao_consumo.toString());
-        sb.append(", faturas=").append(faturas);
         sb.append(", faturacao=").append(faturacao);
         sb.append('}');
         return sb.toString();
@@ -249,6 +222,6 @@ public class FornecedorEnergia {
 
     @Override
     public int hashCode() {
-        return Objects.hash(nome, valor_base, imposto, funcao_consumo, faturas, faturacao);
+        return Objects.hash(nome, valor_base, imposto, funcao_consumo, faturacao);
     }
 }

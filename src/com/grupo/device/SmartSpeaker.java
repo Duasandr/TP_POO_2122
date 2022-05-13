@@ -1,12 +1,13 @@
 package com.grupo.device;
 
+import java.io.Serializable;
 import java.util.Objects;
 
 
 /**
  * Class SmartSpeaker
  */
-public class SmartSpeaker extends SmartDevice {
+public class SmartSpeaker extends SmartDevice implements Serializable {
     // Variáveis de instância
     private String canal;
     private int volume_max;

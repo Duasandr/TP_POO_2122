@@ -1,20 +1,25 @@
-package com.grupo.simulator;
+package com.grupo.model;
 
 import com.grupo.comparators.DoubleDecrescente;
-import com.grupo.comparators.FaturaPorId;
+import com.grupo.device.SmartDevice;
 import com.grupo.house.Casa;
+import com.grupo.house.Divisao;
 import com.grupo.power.Fatura;
 import com.grupo.power.FornecedorEnergia;
-import com.grupo.power.FuncaoDesconto;
+import com.grupo.power.FuncaoConsumo;
+import exceptions.CasaInexistenteException;
+import exceptions.DivisaoInexistenteException;
+import exceptions.LinhaFormatadaInvalidaException;
 
+import java.io.*;
 import java.time.LocalDateTime;
 import java.util.*;
 
-public class Simulador {
+public class Modelo implements Serializable{
     // Variáveis de instância
-    private HashMap<String , FornecedorEnergia> fornecedores;
-    private HashMap<String , Casa> casas;
-    private HashMap<Long , Fatura> faturas;
+    private Map<String , FornecedorEnergia> fornecedores;
+    private Map<String , Casa> casas;
+    private Map<Long , Fatura> faturas;
 
     private static LocalDateTime instante_no_tempo = LocalDateTime.now();
 
@@ -23,7 +28,7 @@ public class Simulador {
     /**
      * Construtor vazio.
      */
-    public Simulador(){
+    public Modelo(){
         this.fornecedores = new HashMap<>();
         this.casas = new HashMap<>();
         this.faturas = new HashMap<>();
@@ -34,7 +39,7 @@ public class Simulador {
      * @param fornecedores
      * @param casas
      */
-    public Simulador(Collection<FornecedorEnergia> fornecedores , Collection<Casa> casas){
+    public Modelo(Collection<FornecedorEnergia> fornecedores , Collection<Casa> casas){
         this();
         this.setFornecedores(fornecedores);
         this.setCasas(casas);
@@ -52,14 +57,6 @@ public class Simulador {
         Set<Casa> copia = new HashSet<>(this.casas.size());
         for (Casa casa : this.casas.values()) {
             copia.add(casa.clone());
-        }
-        return copia;
-    }
-
-    public Set<Fatura> getFaturas() {
-        Set<Fatura> copia = new HashSet<>(this.faturas.size());
-        for (Fatura fatura : this.faturas.values()) {
-            copia.add(fatura.clone());
         }
         return copia;
     }
@@ -90,27 +87,42 @@ public class Simulador {
         saltaPara(destino);
     }
 
-    public void ligaDispositivo(String casa , String id){
-        if(this.casas.containsKey(casa)){
-            this.casas.get(casa).ligarDispositivo(id);
+    /**
+     * Altera o estado de todos os aparelhos de todas as casas.
+     * @param novo_estado Novo estado.
+     */
+    public void alteraEstado(SmartDevice.Estado novo_estado){
+        for (Casa casa : this.casas.values()) {
+            casa.alteraEstado(novo_estado);
         }
     }
 
-    public void desligaDispositivo(String casa , String id){
-        if(this.casas.containsKey(casa)){
-            this.casas.get(casa).desligarDispositivo(id);
+    /**
+     * Altera o estado de todos os dispositivos de uma casa.
+     * @param morada Morada da casa.
+     * @param novo_estado Novo estado.
+     */
+    public void alteraEstado(String morada , SmartDevice.Estado novo_estado) throws CasaInexistenteException {
+        if(this.casas.containsKey(morada)){
+            this.casas.get(morada).alteraEstado(novo_estado);
+        }else{
+            throw new CasaInexistenteException();
         }
     }
 
-    public void ligarTodosDispositivos(String casa , String divisao){
-        if(this.casas.containsKey(casa)){
-            this.casas.get(casa).ligarTodosDispositivos(divisao);
-        }
-    }
-
-    public void desligarTodosDispositivos(String casa , String divisao){
-        if(this.casas.containsKey(casa)){
-            this.casas.get(casa).desligarTodosDispositivos(divisao);
+    /**
+     * Altera o estado de todos os dispositivos de uma divisão.
+     * @param morada Morada da casa.
+     * @param divisao Nome da divisão.
+     * @param novo_estado Novo estado.
+     * @throws CasaInexistenteException Quando não existe a casa.
+     * @throws DivisaoInexistenteException Quando não existe a divisão.
+     */
+    public void alteraEstado(String morada , String divisao , SmartDevice.Estado novo_estado) throws CasaInexistenteException, DivisaoInexistenteException {
+        if(this.casas.containsKey(morada)){
+            this.casas.get(morada).alteraEstadoDivisao(divisao,novo_estado);
+        }else{
+            throw new CasaInexistenteException();
         }
     }
 
@@ -120,22 +132,22 @@ public class Simulador {
         }
     }
 
-    public void alteraFornecedorDesconto(String fornecedor , FuncaoDesconto novo_valor){
+    public void alteraFuncaoConsumo(String fornecedor , String funcao){
         if(this.fornecedores.containsKey(fornecedor)){
-            //this.fornecedores.get(fornecedor).setFuncaoDesconto(novo_valor);
+            this.fornecedores.get(fornecedor).setFuncaoConsumo(FuncaoConsumo.parse(funcao));
         }
     }
 
     public void emiteFaturas(LocalDateTime fim){
         for (Casa casa : this.casas.values()) {
-            Fatura fatura = new Fatura(casa,this.fornecedores.get(casa.getFornecedor()),instante_no_tempo,fim);
+            Fatura fatura = Fatura.emiteFatura(casa,this.fornecedores.get(casa.getFornecedor()),instante_no_tempo,fim);
             this.faturas.put(fatura.getId(),fatura);
         }
     }
 
-    public String casaComMaiorDespesa(){
+    public Fatura casaComMaiorDespesa(){
         double max_despesa = 0.0;
-        String nome = "";
+        Fatura maior_despesa = null;
 
         for (Casa casa : this.casas.values()) {
             Fatura fatura = this.faturas.get(casa.ultimaFatura());
@@ -143,43 +155,47 @@ public class Simulador {
 
             if(despesa > max_despesa){
                 max_despesa = despesa;
-                nome = casa.getMorada();
+                maior_despesa = fatura;
             }
         }
-        return "Casa: " + nome + " Despesa: " + max_despesa + " €";
+        return maior_despesa;
     }
 
-    public String fornecedorComMaiorFaturacao(){
+    public FornecedorEnergia fornecedorComMaiorFaturacao(){
         double max_faturacao = 0.0;
-        String nome = "";
+        FornecedorEnergia maior_faturacao = null;
 
         for (FornecedorEnergia fornecedor : this.fornecedores.values()) {
 
             double faturacao = fornecedor.getFaturacao();
             if(faturacao > max_faturacao){
                 max_faturacao = faturacao;
-                nome = fornecedor.getNome();
+                maior_faturacao = fornecedor;
             }
         }
-        return "Fonecedor: " + nome + " Faturação: " + max_faturacao + " €";
+        return maior_faturacao == null ? null : maior_faturacao.clone();
     }
 
-    public Set<Fatura> getFaturasFornecedor(String nome){
-        Set<Fatura> copia = new TreeSet<>(new FaturaPorId());
+    public Map<FornecedorEnergia , Set<Fatura>> getFaturasFornecedor(String nome){
+        Map<FornecedorEnergia , Set<Fatura>> copia = new HashMap<>();
 
         if(this.fornecedores.containsKey(nome)) {
             for (FornecedorEnergia fornecedor : this.fornecedores.values()) {
-                /*for (Long id_fatura : fornecedor.getFaturas()) {
-                    Fatura fatura = this.faturas.get(id_fatura);
-                    copia.add(fatura.clone());
-                }*/
+                Set<Fatura> faturas_fornecedor = new HashSet<>();
+
+                for (Fatura fatura : this.faturas.values()) {
+                    faturas_fornecedor.add(fatura.clone());
+                }
+
+                copia.put(fornecedor.clone(),faturas_fornecedor);
             }
         }
+
         return  copia;
     }
 
-    public String consumoCasasEntreDatas(LocalDateTime inicio , LocalDateTime fim){
-        TreeMap<Double , StringBuilder> contadores = new TreeMap<>(new DoubleDecrescente());
+    public Map<Double , Set<Casa>> consumoCasasEntreDatas(LocalDateTime inicio , LocalDateTime fim){
+        Map<Double , Set<Casa>> resposta = new TreeMap<>(new DoubleDecrescente());
 
         for (Casa casa : this.casas.values()) {
 
@@ -193,22 +209,35 @@ public class Simulador {
             }
 
             if (consumo > 0){
-                if(contadores.containsKey(consumo)){
-                    contadores.get(consumo).append(" , ").append(casa.getMorada());
+                if(resposta.containsKey(consumo)){
+                    resposta.get(consumo).add(casa.clone());
                 }else{
-                    StringBuilder sb = new StringBuilder(casa.getMorada());
-                    contadores.put(consumo ,sb);
+                    Set<Casa> conjunto = new HashSet<Casa>();
+                    conjunto.add(casa.clone());
+                    resposta.put(consumo ,conjunto);
                 }
             }
         }
 
-        StringBuilder answer = new StringBuilder("lista\n");
-        if(contadores.size() > 0) {
-            for (double consumo : contadores.keySet()) {
-                answer.append(contadores.get(consumo).toString()).append("\n\t").append("Consumo: ").append(consumo*0.001).append("\n");
-            }
+        return resposta;
+    }
+
+    public void setFornecedores(List<String> list) {
+        for (String str : list) {
+            FornecedorEnergia fornecedor = FornecedorEnergia.parse(str);
+            this.fornecedores.put(fornecedor.getNome(),fornecedor);
         }
-        return answer.toString();
+    }
+
+    public void setCasas(List<String> list) throws LinhaFormatadaInvalidaException {
+        for (String str : list) {
+            Casa casa = Casa.parse(str);
+            this.casas.put(casa.getMorada(),casa);
+        }
+    }
+
+    public Casa getCasa(String morada){
+        return this.casas.get(morada).clone();
     }
 
     @Override

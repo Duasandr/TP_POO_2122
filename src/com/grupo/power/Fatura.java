@@ -2,20 +2,20 @@ package com.grupo.power;
 
 import com.grupo.house.Casa;
 
+import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.Comparator;
 import java.util.Objects;
 
-public class Fatura {
+public class Fatura implements Serializable {
     //Variáveis de instância
 
     private long id;
-    private String cliente;
     private String morada;
-    private int nif_cliente;
     private String fornecedor;
     private double total_a_pagar;
+    private double total_consumo;
     private LocalDateTime inicio;
     private LocalDateTime fim;
 
@@ -32,25 +32,12 @@ public class Fatura {
         this.id = proximo_id++;
     }
 
-    /**
-     * Construtor por parâmetros.
-     * @param cliente
-     * @param morada
-     * @param nif_cliente
-     * @param fornecedor
-     * @param total_consumo
-     * @param preco_kw
-     * @param imposto
-     * @param desconto
-     * @param total_a_pagar
-     */
-    public Fatura(String cliente,String morada,int nif_cliente,String fornecedor,double total_consumo,double preco_kw,double imposto,double desconto,double total_a_pagar,LocalDateTime inicio , LocalDateTime fim){
-        this.id = proximo_id++;
-        this.cliente = cliente;
+    public Fatura(String morada , String fornecedor, double total_a_pagar , double total_consumo,LocalDateTime inicio,LocalDateTime fim){
+        this();
         this.morada = morada;
-        this.nif_cliente = nif_cliente;
         this.fornecedor = fornecedor;
         this.total_a_pagar = total_a_pagar;
+        this.total_consumo = total_consumo;
         this.inicio = inicio;
         this.fim = fim;
     }
@@ -62,16 +49,7 @@ public class Fatura {
      * @param fim
      */
     public Fatura(Casa casa , FornecedorEnergia fornecedor ,LocalDateTime inicio , LocalDateTime fim){
-        this.id = proximo_id++;
-        this.cliente = casa.getProprietario();
-        this.morada = casa.getMorada();
-        this.nif_cliente = casa.getNifProprietario();
-        this.fornecedor = fornecedor.getNome();
-
-        this.inicio = inicio;
-        this.fim = fim;
-        casa.guardaFatura(this.id);
-        //fornecedor.guardaFatura(this.id,total_a_pagar);
+        this(casa.getMorada(), fornecedor.getNome(), fornecedor.calculaValorPagar(casa), casa.getConsumoEnergia(), inicio,fim);
     }
 
     /**
@@ -80,11 +58,10 @@ public class Fatura {
      */
     public Fatura(Fatura fatura){
         this.id = fatura.id;
-        this.cliente = fatura.cliente;
         this.morada = fatura.morada;
-        this.nif_cliente = fatura.nif_cliente;
         this.fornecedor = fatura.fornecedor;
         this.total_a_pagar = fatura.total_a_pagar;
+        this.total_consumo = fatura.total_consumo;
         this.inicio = fatura.inicio;
         this.fim = fatura.fim;
     }
@@ -101,6 +78,10 @@ public class Fatura {
         return this.total_a_pagar;
     }
 
+    public double getTotalConsumo() {
+        return this.total_consumo;
+    }
+
     public LocalDateTime getInicio() {
         return this.inicio;
     }
@@ -109,8 +90,11 @@ public class Fatura {
         return this.fim;
     }
 
-    public double getTotalConsumo() {
-        return 0.0;//total_consumo;
+    public static Fatura emiteFatura(Casa casa,FornecedorEnergia fornecedor,LocalDateTime inicio , LocalDateTime fim){
+        Fatura fatura = new Fatura(casa,fornecedor,inicio,fim);
+        casa.guardaFatura(fatura.id);
+        fornecedor.atualizaFaturacao(fatura.total_a_pagar);
+        return fatura;
     }
 
     /**
@@ -124,9 +108,8 @@ public class Fatura {
         if (o == null || getClass() != o.getClass()) return false;
         Fatura fatura = (Fatura) o;
         return this.id == fatura.id &&
-                nif_cliente == fatura.nif_cliente &&
                 Double.compare(fatura.total_a_pagar, total_a_pagar) == 0 &&
-                Objects.equals(cliente, fatura.cliente) && Objects.equals(morada, fatura.morada) &&
+                Objects.equals(morada, fatura.morada) &&
                 Objects.equals(fornecedor, fatura.fornecedor);
     }
 
@@ -136,7 +119,7 @@ public class Fatura {
      */
     @Override
     public int hashCode() {
-        return Objects.hash(id,cliente, morada, nif_cliente, fornecedor, total_a_pagar);
+        return Objects.hash(id, morada, fornecedor, total_a_pagar);
     }
 
     /**
@@ -156,9 +139,7 @@ public class Fatura {
     public String toString() {
         final StringBuilder sb = new StringBuilder("Fatura{");
         sb.append("id=").append(id);
-        sb.append(", cliente='").append(cliente).append('\'');
         sb.append(", morada='").append(morada).append('\'');
-        sb.append(", nif_cliente=").append(nif_cliente);
         sb.append(", fornecedor='").append(fornecedor).append('\'');
         sb.append(", total_a_pagar=").append(total_a_pagar);
         sb.append(", inicio=").append(inicio);

@@ -2,7 +2,9 @@ package com.grupo.power;
 
 import com.grupo.house.Casa;
 
-public class FuncaoConsumoPadrao extends FuncaoConsumo{
+import java.io.Serializable;
+
+public class FuncaoConsumoPadrao extends FuncaoConsumo implements Serializable {
 
     /**
      * Calcula o total a pagar segundo os dados do fornecedor. EnergiaGasta * preço kw * 1 + imposto.

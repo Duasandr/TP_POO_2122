@@ -1,0 +1,16 @@
+   <<<Sir Manuel>>>
+-------------------------------------------------
+| ld              : Carregar dados (ficheiro binário)
+| ld -txt         : Carregar dados (ficheiros de texto)
+| ld -rand        : Carregar com dados aleatórios
+| on -all         : Ligar todos os dispositivos
+| on -all -h      : Ligar todos os aparelhos de uma casa
+| on -all -h -div : Ligar todos os aparelhos de uma divisão de uma casa
+| on -h -dev      : Ligar dispositivo em especifico de uma casa
+| off -all        : Desligar todos os dispositivos
+| off -h -div     : Desligar todos os aparelhos de uma divisão de uma casa
+| off -h -dev     : Desligar dispositivo em especifico de uma casa
+| status          : Apresenta o estado do simulador
+| status -h       : Apresenta o estado das casas
+| status -f       : Apresenta o estado dos fornecedores
+-------------------------------------------------

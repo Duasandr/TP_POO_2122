@@ -1,11 +1,14 @@
 package com.grupo.device;
 
+import exceptions.LinhaFormatadaInvalidaException;
+
+import java.io.Serializable;
 import java.util.Locale;
 
 /**
  * Classe SmartDevice
  */
-public abstract class SmartDevice {
+public abstract class SmartDevice implements Serializable {
     //Variáveis de instância
     private String id;
     private Estado estado;
@@ -186,7 +189,7 @@ public abstract class SmartDevice {
     @Override
     public abstract int hashCode();
 
-    public static SmartDevice parse(String str){
+    public static SmartDevice parse(String str) throws LinhaFormatadaInvalidaException {
         String[] tokens = str.split(":");
         SmartDevice device = null;
         switch (tokens[0]) {
@@ -194,6 +197,7 @@ public abstract class SmartDevice {
             case "Speaker" -> device = SmartSpeaker.parse(tokens[1]);
             case "Camera" -> device = SmartCamera.parse(tokens[1]);
             default -> {
+                throw new LinhaFormatadaInvalidaException(str);
             }
         }
         return device;

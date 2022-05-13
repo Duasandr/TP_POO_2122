@@ -1,20 +1,10 @@
-package com.grupo.simulator;
+package com.grupo.model;
 
-import com.grupo.device.SmartDevice;
-import com.grupo.device.SmartSpeaker;
-import com.grupo.house.Casa;
-import com.grupo.house.Divisao;
-import com.grupo.power.FornecedorEnergia;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import java.time.LocalDateTime;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Set;
-
-class SimuladorTest {
+class ModeloTest {
 
     @BeforeEach
     void setUp() {
