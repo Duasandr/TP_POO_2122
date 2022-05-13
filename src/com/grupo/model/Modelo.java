@@ -2,13 +2,11 @@ package com.grupo.model;
 
 import com.grupo.comparators.DoubleDecrescente;
 import com.grupo.device.SmartDevice;
+import com.grupo.exceptions.*;
 import com.grupo.house.Casa;
 import com.grupo.power.Fatura;
 import com.grupo.power.FornecedorEnergia;
 import com.grupo.power.FuncaoConsumo;
-import com.grupo.exceptions.CasaInexistenteException;
-import com.grupo.exceptions.DivisaoInexistenteException;
-import com.grupo.exceptions.LinhaFormatadaInvalidaException;
 
 import java.io.*;
 import java.time.LocalDateTime;
@@ -144,9 +142,9 @@ public class Modelo implements Serializable{
         }
     }
 
-    public Fatura casaComMaiorDespesa(){
+    public Casa casaComMaiorDespesa(){
         double max_despesa = 0.0;
-        Fatura maior_despesa = null;
+        Casa maior_despesa = null;
 
         for (Casa casa : this.casas.values()) {
             Fatura fatura = this.faturas.get(casa.ultimaFatura());
@@ -154,10 +152,11 @@ public class Modelo implements Serializable{
 
             if(despesa > max_despesa){
                 max_despesa = despesa;
-                maior_despesa = fatura;
+                maior_despesa = casa;
             }
         }
-        return maior_despesa;
+        assert maior_despesa != null;
+        return maior_despesa.clone();
     }
 
     public FornecedorEnergia fornecedorComMaiorFaturacao(){
@@ -228,7 +227,7 @@ public class Modelo implements Serializable{
         }
     }
 
-    public void setCasas(List<String> list) throws LinhaFormatadaInvalidaException {
+    public void setCasas(List<String> list) throws LinhaFormatadaInvalidaException, SmartDeviceInvalidoException, TonalidadeInvalidaException, EstadoInvalidoException {
         for (String str : list) {
             Casa casa = Casa.parse(str);
             this.casas.put(casa.getMorada(),casa);

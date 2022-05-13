@@ -1,9 +1,7 @@
 package com.grupo.house;
 
 import com.grupo.device.SmartDevice;
-import com.grupo.exceptions.DispositivoNaoExisteException;
-import com.grupo.exceptions.DivisaoInexistenteException;
-import com.grupo.exceptions.LinhaFormatadaInvalidaException;
+import com.grupo.exceptions.*;
 
 import java.io.Serializable;
 import java.util.*;
@@ -185,6 +183,7 @@ public class Casa implements Serializable {
         return new TreeSet<>(this.id_faturas);
     }
 
+
     //Métodos auxiliares
 
     /**
@@ -250,7 +249,7 @@ public class Casa implements Serializable {
         if(local != null){
             local.alteraEstado(id_dispositivo,novo_estado);
         }else{
-            throw new DispositivoNaoExisteException();
+            throw new DispositivoNaoExisteException(id_dispositivo);
         }
     }
 
@@ -317,7 +316,7 @@ public class Casa implements Serializable {
         return Objects.hash(proprietario, nif_proprietario , morada);
     }
 
-    public static Casa parse(String str) throws LinhaFormatadaInvalidaException {
+    public static Casa parse(String str) throws LinhaFormatadaInvalidaException, SmartDeviceInvalidoException, TonalidadeInvalidaException, EstadoInvalidoException {
         String[] tokens = str.split("\\{");
         String[] tokens_casa = tokens[0].split(";");
         String[] tokens_divisoes = tokens[1].split("\\|");

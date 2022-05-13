@@ -1,16 +1,19 @@
    <<<Sir Manuel>>>
 -------------------------------------------------
-| ld              : Carregar dados (ficheiro binário)
-| ld -txt         : Carregar dados (ficheiros de texto)
-| ld -rand        : Carregar com dados aleatórios
-| on -all         : Ligar todos os dispositivos
-| on -all -h      : Ligar todos os aparelhos de uma casa
-| on -all -h -div : Ligar todos os aparelhos de uma divisão de uma casa
-| on -h -dev      : Ligar dispositivo em especifico de uma casa
-| off -all        : Desligar todos os dispositivos
-| off -h -div     : Desligar todos os aparelhos de uma divisão de uma casa
-| off -h -dev     : Desligar dispositivo em especifico de uma casa
-| status          : Apresenta o estado do simulador
-| status -h       : Apresenta o estado das casas
-| status -f       : Apresenta o estado dos fornecedores
+| ld                      : Carregar dados (ficheiro binário)
+| ld -txt                 : Carregar dados (ficheiros de texto)
+| ld -rand                : Carregar com dados aleatórios
+| mod -allon              : Ligar todos os dispositivos
+| mod -allof              : Desligar todos os dispositivos
+| mod -divon <casa> <divisao> : Ligar todos os aparelhos de uma divisão de uma casa
+| mod -divof <casa> <divisao> : Desligar todos os aparelhos de uma divisão de uma casa
+| dev -on <id> : Liga um dispositivo
+| dev -off <id> : Desliga um dispositivo
+| stat          : Apresenta o estado do simulador
+| stat -h       : Apresenta o estado das casas
+| stat -f       : Apresenta o estado dos fornecedores
+| mvp -h   : Apresenta a casa com maior consumo
+| mvp -f   : Apresenta o fornecedor com maior faturação
+| bills <fornecedor> : Listar faturas do fornecedor
+| dar <data inicio> <data fim> : "Dar" uma ordenação dos maiores consumidores
 -------------------------------------------------

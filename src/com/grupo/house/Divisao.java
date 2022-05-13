@@ -1,8 +1,7 @@
 package com.grupo.house;
 
 import com.grupo.device.SmartDevice;
-import com.grupo.exceptions.DispositivoNaoExisteException;
-import com.grupo.exceptions.LinhaFormatadaInvalidaException;
+import com.grupo.exceptions.*;
 
 import java.io.Serializable;
 import java.util.*;
@@ -106,6 +105,17 @@ public class Divisao implements Serializable {
         return this.aparelhos.size();
     }
 
+    public SmartDevice getDispositivo(String id) throws DispositivoNaoExisteException {
+        SmartDevice device;
+        if(this.aparelhos.containsKey(id)){
+            device = this.aparelhos.get(id).clone();
+        }
+        else{
+            throw new DispositivoNaoExisteException(id);
+        }
+        return device;
+    }
+
     //Métodos auxiliares
 
     /**
@@ -140,7 +150,7 @@ public class Divisao implements Serializable {
         if(contem(id_dispositivo)){
             this.aparelhos.get(id_dispositivo).setEstado(novo_estado);
         }else{
-            throw new DispositivoNaoExisteException();
+            throw new DispositivoNaoExisteException(id_dispositivo);
         }
     }
 
@@ -152,7 +162,7 @@ public class Divisao implements Serializable {
      * @return Divisao nova
      * @throws LinhaFormatadaInvalidaException Acontece quando a linha de texto está mal formatada.
      */
-    public static Divisao parse(String str) throws LinhaFormatadaInvalidaException {
+    public static Divisao parse(String str) throws LinhaFormatadaInvalidaException, SmartDeviceInvalidoException, TonalidadeInvalidaException, EstadoInvalidoException {
         String[] tokens = str.split("\\[");
         String[] str_dispositivos = tokens[1].split(" ");
         Divisao divisao = new Divisao();
@@ -161,7 +171,7 @@ public class Divisao implements Serializable {
             Set<SmartDevice> dispositivos = new HashSet<>(str_dispositivos.length);
 
             for (String disp : str_dispositivos) {
-                dispositivos.add(SmartDevice.parse(disp));
+                dispositivos.add(SmartDevice.parse(disp.split(" ")));
             }
 
             divisao.setNome(tokens[0]);
