@@ -41,15 +41,6 @@ public abstract class SmartDevice implements Serializable {
         this.preco_instalacao = preco;
     }
 
-    /**
-     * Construtor por cópia.
-     *
-     * @param device Aparelho a ser copiado.
-     */
-    public SmartDevice(SmartDevice device) {
-        this(device.id, device.estado, device.preco_instalacao);
-    }
-
     //Métodos de instância
 
     //Getters
@@ -119,35 +110,22 @@ public abstract class SmartDevice implements Serializable {
         this.preco_instalacao = preco;
     }
 
-    //Interface
-
-
-    /**
-     * Liga um aparelho.
-     */
-    public void ligar() {
-        this.setEstado(Estado.LIGADO);
-    }
-
-    /**
-     * Desliga um aparelho.
-     */
-    public void desligar() {
-        this.setEstado(Estado.DESLIGADO);
-    }
-
-    /**
-     * Testa se o aparelho está ligado
-     *
-     * @return true - false
-     */
-    public boolean estaLigado() {
-        return this.estado == Estado.LIGADO;
-    }
+    //Métodos de parsing
 
     public static Estado parseEstado(String str){
         return str.toUpperCase(Locale.ROOT).equals("LIGADO") ? Estado.LIGADO : Estado.DESLIGADO;
     }
+
+    public static SmartDevice parse(String[] tokens) throws LinhaFormatadaInvalidaException {
+        return switch (tokens[0]) {
+            case "Bulb" -> SmartBulb.parse(tokens[1]);
+            case "Speaker" -> SmartSpeaker.parse(tokens[1]);
+            case "Camera" -> SmartCamera.parse(tokens[1]);
+            default -> throw new LinhaFormatadaInvalidaException(tokens[0]);
+        };
+    }
+
+    //Métodos de Object
 
     /**
      * Clona o aparelho.
@@ -172,34 +150,14 @@ public abstract class SmartDevice implements Serializable {
      * @return Representação do objeto.
      */
     @Override
-    public String toString() {
-        final StringBuilder sb = new StringBuilder("SmartDevice{");
-        sb.append("id='").append(id).append('\'');
-        sb.append(", estado=").append(estado);
-        sb.append(", preco_instalacao=").append(preco_instalacao);
-        sb.append('}');
-        return sb.toString();
-    }
+    public abstract String toString();
 
     /**
-     * Cria um indice através de uma função de hash.
+     * Cria um indice por uma função de hash.
      *
      * @return Indice
      */
     @Override
     public abstract int hashCode();
 
-    public static SmartDevice parse(String str) throws LinhaFormatadaInvalidaException {
-        String[] tokens = str.split(":");
-        SmartDevice device = null;
-        switch (tokens[0]) {
-            case "Bulb" -> device = SmartBulb.parse(tokens[1]);
-            case "Speaker" -> device = SmartSpeaker.parse(tokens[1]);
-            case "Camera" -> device = SmartCamera.parse(tokens[1]);
-            default -> {
-                throw new LinhaFormatadaInvalidaException(str);
-            }
-        }
-        return device;
-    }
 }
