@@ -11,7 +11,7 @@ public class SmartBulb extends SmartDevice implements Serializable {
     private static final double valor_fixo = 0.1;
 
     /**
-     * Posiveis estados da tonalidade
+     * Possiveis estados da tonalidade
      */
     public enum Tonalidade {
         FRIA,
@@ -131,23 +131,15 @@ public class SmartBulb extends SmartDevice implements Serializable {
     }
 
     public static Tonalidade parseTonalidade(String str){
-        Tonalidade tone;
-        switch (str.toUpperCase(Locale.ROOT)){
-            case "FRIA":
-                tone = Tonalidade.FRIA;
-                break;
-            case "QUENTE":
-                tone = Tonalidade.QUENTE;
-                break;
-            default:
-                tone = Tonalidade.NEUTRA;
-                break;
-        }
-        return tone;
+        return switch (str.toUpperCase(Locale.ROOT)) {
+            case "FRIA" -> Tonalidade.FRIA;
+            case "QUENTE" -> Tonalidade.QUENTE;
+            default -> Tonalidade.NEUTRA;
+        };
     }
 
     /**
-     * Transforma uma string formatada numa SmartBulb.
+     * Transforma uma ‘string’ formatada numa SmartBulb.
      * @param str String
      * @return SmartBulb
      */
@@ -200,13 +192,16 @@ public class SmartBulb extends SmartDevice implements Serializable {
      */
     @Override
     public String toString() {
-        return super.toString() + "{ Tonalidade: " + this.getTonalidade() +
-                ", Dimensao: " + this.getDimensao() +
-                "}";
+        return "SmartBulb{" + "ID=" + this.getIdFabricante() +
+                ", estado=" + this.getEstado().toString() +
+                ", preco_instalacao=" + this.getPrecoInstalacao() +
+                ", tonalidade=" + tonalidade +
+                ", dimensao=" + dimensao +
+                '}';
     }
 
     /**
-     * Cria um indice através de uma função de hash.
+     * Cria um indice por uma função de hash.
      *
      * @return Indice
      */
