@@ -1,5 +1,7 @@
 package com.grupo.device;
 
+import exceptions.EstadoInvalidoException;
+
 import java.io.Serializable;
 import java.util.Objects;
 
@@ -120,48 +122,13 @@ public class SmartSpeaker extends SmartDevice implements Serializable {
         return this.getEstado() == Estado.LIGADO ? valor_fixo + 0.5 * this.volume : 0.0;
     }
 
-    public static SmartSpeaker parse(String str) {
-        String[] tokens = str.split(";");
-        SmartSpeaker speaker = new SmartSpeaker();
-        speaker.setIdFabricante(tokens[0]);
-        speaker.setEstado(SmartDevice.parseEstado(tokens[1]));
-        speaker.setPrecoInstalacao(Double.parseDouble(tokens[2]));
-        speaker.volume = Integer.parseInt(tokens[3]);
-        speaker.canal = tokens[4];
-        speaker.volume_max = Integer.parseInt(tokens[5]);
-
-        return speaker;
-    }
-
-    /**
-     * Muda o canal em que a coluna de rádio está.
-     *
-     * @param canal Novo canal.
-     */
-    public void mudaCanal(String canal) {
-        this.setCanal(canal);
-    }
-
-    /**
-     * Aumenta o volume da coluna.
-     */
-    public void aumentaVolume() {
-        int volume_atual = this.getVolume();
-        if (volume_atual < this.getVolumeMaximo()) {
-            volume_atual++;
-            this.setVolume(volume_atual);
-        }
-    }
-
-    /**
-     * Diminui o volume da coluna.
-     */
-    public void diminuiVolume() {
-        int volume_atual = this.getVolume();
-        if (volume_atual > 0) {
-            volume_atual--;
-            this.setVolume(volume_atual);
-        }
+    public static SmartSpeaker parse(String[] tokens) throws EstadoInvalidoException {
+        return new SmartSpeaker(tokens[0],
+                SmartDevice.parseEstado(tokens[1]),
+                Double.parseDouble(tokens[2]),
+                Integer.parseInt(tokens[3]),
+                tokens[4],
+                Integer.parseInt(tokens[5]));
     }
 
     /**
@@ -183,8 +150,7 @@ public class SmartSpeaker extends SmartDevice implements Serializable {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (o == null || !o.getClass().getSimpleName().equals("SmartSpeaker")) return false;
-        SmartSpeaker speaker = (SmartSpeaker) o;
+        if (!(o instanceof SmartSpeaker speaker)) return false;
         return this.getIdFabricante().equals(speaker.getIdFabricante()) &&
                 this.getEstado().equals(speaker.getEstado()) &&
                 Double.compare(this.getPrecoInstalacao(), speaker.getPrecoInstalacao()) == 0 &&

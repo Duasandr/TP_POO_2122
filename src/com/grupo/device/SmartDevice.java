@@ -1,6 +1,8 @@
 package com.grupo.device;
 
-import exceptions.LinhaFormatadaInvalidaException;
+import exceptions.EstadoInvalidoException;
+import exceptions.SmartDeviceInvalidoException;
+import exceptions.TonalidadeInvalidaException;
 
 import java.io.Serializable;
 import java.util.Locale;
@@ -39,15 +41,6 @@ public abstract class SmartDevice implements Serializable {
         this.id = id;
         this.estado = estado;
         this.preco_instalacao = preco;
-    }
-
-    /**
-     * Construtor por cópia.
-     *
-     * @param device Aparelho a ser copiado.
-     */
-    public SmartDevice(SmartDevice device) {
-        this(device.id, device.estado, device.preco_instalacao);
     }
 
     //Métodos de instância
@@ -119,35 +112,38 @@ public abstract class SmartDevice implements Serializable {
         this.preco_instalacao = preco;
     }
 
-    //Interface
-
-
-    /**
-     * Liga um aparelho.
-     */
-    public void ligar() {
-        this.setEstado(Estado.LIGADO);
-    }
+    //Métodos de parsing
 
     /**
-     * Desliga um aparelho.
+     * Faz o parse de uma 'string' para o estado do aparelho.
+     * @param str Estado em forma de texto
+     * @return Estado
      */
-    public void desligar() {
-        this.setEstado(Estado.DESLIGADO);
+    public static Estado parseEstado(String str) throws EstadoInvalidoException {
+        return switch (str.toUpperCase(Locale.ROOT)){
+            case "LIGADO"-> Estado.LIGADO;
+            case "DESLIGADO"-> Estado.DESLIGADO;
+            default -> throw new EstadoInvalidoException(str);
+        };
     }
 
     /**
-     * Testa se o aparelho está ligado
-     *
-     * @return true - false
+     * Faz o parse de uma lista de tokens para um SmartDevice.
+     * @param tokens Parâmetros do objeto.
+     * @return Uma nova instância do objeto.
+     * @throws SmartDeviceInvalidoException Acontece quando não é reconhecido o tipo do dispositivo.
+     * @throws TonalidadeInvalidaException Acontece quando não é reconhecida uma tonalidade.
      */
-    public boolean estaLigado() {
-        return this.estado == Estado.LIGADO;
+    public static SmartDevice parse(String[] tokens) throws SmartDeviceInvalidoException, TonalidadeInvalidaException, EstadoInvalidoException {
+        return switch (tokens[0]) {
+            case "Bulb" -> SmartBulb.parse(tokens[1].split(";"));
+            case "Speaker" -> SmartSpeaker.parse(tokens[1].split(";"));
+            case "Camera" -> SmartCamera.parse(tokens[1].split(";"));
+            default -> throw new SmartDeviceInvalidoException(tokens[0]);
+        };
     }
 
-    public static Estado parseEstado(String str){
-        return str.toUpperCase(Locale.ROOT).equals("LIGADO") ? Estado.LIGADO : Estado.DESLIGADO;
-    }
+    //Métodos de Object
 
     /**
      * Clona o aparelho.
@@ -167,39 +163,10 @@ public abstract class SmartDevice implements Serializable {
     public abstract boolean equals(Object o);
 
     /**
-     * Devolve uma representação textual do objeto.
-     *
-     * @return Representação do objeto.
-     */
-    @Override
-    public String toString() {
-        final StringBuilder sb = new StringBuilder("SmartDevice{");
-        sb.append("id='").append(id).append('\'');
-        sb.append(", estado=").append(estado);
-        sb.append(", preco_instalacao=").append(preco_instalacao);
-        sb.append('}');
-        return sb.toString();
-    }
-
-    /**
      * Cria um indice através de uma função de hash.
      *
      * @return Indice
      */
     @Override
     public abstract int hashCode();
-
-    public static SmartDevice parse(String str) throws LinhaFormatadaInvalidaException {
-        String[] tokens = str.split(":");
-        SmartDevice device = null;
-        switch (tokens[0]) {
-            case "Bulb" -> device = SmartBulb.parse(tokens[1]);
-            case "Speaker" -> device = SmartSpeaker.parse(tokens[1]);
-            case "Camera" -> device = SmartCamera.parse(tokens[1]);
-            default -> {
-                throw new LinhaFormatadaInvalidaException(str);
-            }
-        }
-        return device;
-    }
 }
