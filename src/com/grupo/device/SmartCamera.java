@@ -1,6 +1,6 @@
 package com.grupo.device;
 
-import exceptions.EstadoInvalidoException;
+import com.grupo.exceptions.EstadoInvalidoException;
 
 import java.io.Serializable;
 import java.util.Objects;

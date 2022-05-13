@@ -3,7 +3,7 @@ package com.grupo;
 import com.grupo.controlador.Controlador;
 import com.grupo.view.View;
 import com.grupo.model.Modelo;
-import exceptions.LinhaFormatadaInvalidaException;
+import com.grupo.exceptions.LinhaFormatadaInvalidaException;
 
 import java.io.IOException;
 

@@ -1,9 +1,7 @@
 package com.grupo.house;
 
-import exceptions.LinhaFormatadaInvalidaException;
+import com.grupo.exceptions.LinhaFormatadaInvalidaException;
 import org.junit.jupiter.api.Test;
-
-import static org.junit.jupiter.api.Assertions.*;
 
 class DivisaoTest {
 

@@ -1,7 +1,7 @@
 package com.grupo.view;
 
 import com.grupo.controlador.Controlador;
-import exceptions.LinhaFormatadaInvalidaException;
+import com.grupo.exceptions.LinhaFormatadaInvalidaException;
 
 import java.io.IOException;
 

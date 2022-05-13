@@ -1,39 +1,72 @@
 package com.grupo.device;
 
+import com.grupo.exceptions.TonalidadeInvalidaException;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-class SmartBulbTest extends SmartBulb {
+class SmartBulbTest {
+    SmartBulb bulb1 = new SmartBulb("test", SmartDevice.Estado.DESLIGADO,19.99, SmartBulb.Tonalidade.FRIA,0.45);
+    SmartBulb bulb2;
+    SmartBulb.Tonalidade tone;
+    @BeforeEach
+    void setUp() {
+    }
 
-    @Test
-    void testgetTonalidade() {
+    @AfterEach
+    void tearDown() {
     }
 
     @Test
-    void testgetDimensao() {
+    void getTonalidade() {
+        assertEquals(SmartBulb.Tonalidade.FRIA,bulb1.getTonalidade());
+    }
+
+    @Test
+    void getDimensao() {
+        assertEquals(0.45,bulb1.getDimensao());
+    }
+
+    @Test
+    void setTonalidade() {
+        bulb1.setTonalidade(SmartBulb.Tonalidade.QUENTE);
+        assertEquals(SmartBulb.Tonalidade.QUENTE,bulb1.getTonalidade());
     }
 
     @Test
     void setDimensao() {
+        bulb1.setDimensao(0.5);
+        assertEquals(0.5,bulb1.getDimensao());
     }
 
     @Test
-    void testGetConsumoEnergia() {
-    }
-
-    @Test
-    void mudaTonalidade() {
+    void getConsumoEnergia() {
+        assertEquals(0.0,bulb1.getConsumoEnergia());
+        bulb1.setEstado(SmartDevice.Estado.LIGADO);
+        assertNotEquals(0.0,bulb1.getConsumoEnergia());
     }
 
     @Test
     void parseTonalidade() {
+        try {
+            assertEquals(SmartBulb.Tonalidade.NEUTRA, SmartBulb.parseTonalidade("neutra"));
+            SmartBulb.parseTonalidade("super quente");
+        } catch (TonalidadeInvalidaException e){
+            System.out.println(e.getMessage());
+        }
     }
 
     @Test
     void parse() {
-        SmartBulb bulb = SmartBulb.parse("id1;ligado;12.2;fria;0.23");
-        System.out.println(bulb);
+        /*try {
+            bulb2 = SmartBulb.parse("parse_test;ligado;19.25")
+            assertEquals(SmartBulb.Tonalidade.NEUTRA, SmartBulb.parseTonalidade("neutra"));
+            SmartBulb.parseTonalidade("super quente");
+        } catch (TonalidadeInvalidaException e){
+            System.out.println(e.getMessage());
+        }*/
     }
 
     @Test

@@ -3,13 +3,12 @@ package com.grupo.model;
 import com.grupo.comparators.DoubleDecrescente;
 import com.grupo.device.SmartDevice;
 import com.grupo.house.Casa;
-import com.grupo.house.Divisao;
 import com.grupo.power.Fatura;
 import com.grupo.power.FornecedorEnergia;
 import com.grupo.power.FuncaoConsumo;
-import exceptions.CasaInexistenteException;
-import exceptions.DivisaoInexistenteException;
-import exceptions.LinhaFormatadaInvalidaException;
+import com.grupo.exceptions.CasaInexistenteException;
+import com.grupo.exceptions.DivisaoInexistenteException;
+import com.grupo.exceptions.LinhaFormatadaInvalidaException;
 
 import java.io.*;
 import java.time.LocalDateTime;

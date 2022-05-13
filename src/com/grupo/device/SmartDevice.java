@@ -1,8 +1,8 @@
 package com.grupo.device;
 
-import exceptions.EstadoInvalidoException;
-import exceptions.SmartDeviceInvalidoException;
-import exceptions.TonalidadeInvalidaException;
+import com.grupo.exceptions.EstadoInvalidoException;
+import com.grupo.exceptions.SmartDeviceInvalidoException;
+import com.grupo.exceptions.TonalidadeInvalidaException;
 
 import java.io.Serializable;
 import java.util.Locale;

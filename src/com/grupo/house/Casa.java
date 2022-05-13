@@ -1,9 +1,9 @@
 package com.grupo.house;
 
 import com.grupo.device.SmartDevice;
-import exceptions.DispositivoNaoExisteException;
-import exceptions.DivisaoInexistenteException;
-import exceptions.LinhaFormatadaInvalidaException;
+import com.grupo.exceptions.DispositivoNaoExisteException;
+import com.grupo.exceptions.DivisaoInexistenteException;
+import com.grupo.exceptions.LinhaFormatadaInvalidaException;
 
 import java.io.Serializable;
 import java.util.*;

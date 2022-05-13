@@ -1,4 +1,4 @@
-package exceptions;
+package com.grupo.exceptions;
 
 public class LinhaFormatadaInvalidaException extends Exception{
     public LinhaFormatadaInvalidaException(String linha){

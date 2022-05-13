@@ -1,4 +1,4 @@
-package exceptions;
+package com.grupo.exceptions;
 
 public class NenhumDispositivoException extends Exception{
     public NenhumDispositivoException(String local){

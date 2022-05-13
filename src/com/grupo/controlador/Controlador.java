@@ -5,9 +5,9 @@ import com.grupo.generator.GeradorAleatorio;
 import com.grupo.house.Casa;
 import com.grupo.power.FornecedorEnergia;
 import com.grupo.model.Modelo;
-import exceptions.CasaInexistenteException;
-import exceptions.DivisaoInexistenteException;
-import exceptions.LinhaFormatadaInvalidaException;
+import com.grupo.exceptions.CasaInexistenteException;
+import com.grupo.exceptions.DivisaoInexistenteException;
+import com.grupo.exceptions.LinhaFormatadaInvalidaException;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;

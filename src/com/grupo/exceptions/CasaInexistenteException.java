@@ -1,4 +1,4 @@
-package exceptions;
+package com.grupo.exceptions;
 
 public class CasaInexistenteException extends Exception{
     public CasaInexistenteException(){
