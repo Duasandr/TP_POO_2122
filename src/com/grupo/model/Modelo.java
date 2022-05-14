@@ -6,12 +6,10 @@ import com.grupo.exceptions.*;
 import com.grupo.house.Casa;
 import com.grupo.power.Fatura;
 import com.grupo.power.FornecedorEnergia;
-import com.grupo.power.FuncaoConsumo;
 
 import java.io.*;
 import java.time.LocalDateTime;
 import java.util.*;
-import java.util.stream.Collectors;
 
 public class Modelo implements Serializable{
     // Variáveis de instância
@@ -41,12 +39,100 @@ public class Modelo implements Serializable{
         this.setCasas(casas);
     }
 
+    //Getters
+
+    /**
+     * Devolve um iterador para os fornecedores contidos.
+     * @return Iterator
+     */
     public Iterator<FornecedorEnergia> getFornecedor() {
         return this.fornecedores.values().iterator();
     }
 
+    /**
+     * Devolve o fornecedor da casa fornecida.
+     * @param casa Casa
+     * @return FornecedorEnergia
+     */
     public FornecedorEnergia getFornecedor(Casa casa){
         return this.fornecedores.get(casa.getFornecedor()).clone();
+    }
+
+    /**
+     * Devolve um iterador para uma lista ordenada por um comparador.
+     * @param comp Comparator
+     * @return Iterator
+     */
+    public Iterator<FornecedorEnergia> getFornecedor(Comparator<FornecedorEnergia> comp){
+        List<FornecedorEnergia> fornecedor = this.fornecedores.values()
+                .stream()
+                .map(FornecedorEnergia::clone)
+                .toList();
+        fornecedor.sort(comp);
+        return fornecedor.iterator();
+    }
+
+    /**
+     * Devolve uma casa.
+     * @param morada String
+     * @return Casa
+     */
+    public Casa getCasa(String morada){
+        return this.casas.get(morada).clone();
+    }
+
+    /**
+     * Devolve um iterador para as casas contidas.
+     * @return Iterator
+     */
+    public Iterator<Casa> getCasa() {
+        return this.casas.values()
+                .stream()
+                .map(Casa::clone)
+                .toList().iterator();
+    }
+
+    /**
+     * Devolve um iterador para uma lista de casas ordenada por ordem decrescente de consumo entre as datas indicadas.
+     * @param inicio LocalDatetime
+     * @param fim LocalDateTime
+     * @return Iterator
+     */
+    public Iterator<Casa> getCasa(LocalDateTime inicio , LocalDateTime fim){
+        List<Fatura> faturas = this.faturas.values()
+                .stream()
+                .filter(fatura -> fatura.getInicio().isBefore(fim) && fatura.getFim().isAfter(inicio))
+                .map(Fatura::clone)
+                .toList();
+
+        Map<Double,Casa> casas = new TreeMap<>(new DoubleDecrescente());
+        for (Fatura fatura : faturas) {
+            casas.put(fatura.getTotalConsumo(),this.casas.get(fatura.getMorada()).clone());
+        }
+
+        return casas.values().iterator();
+    }
+
+    /**
+     * Devolve uma fatura.
+     * @param id_fatura long
+     * @return Fatura
+     */
+    public Fatura getFatura(long id_fatura){
+        return this.faturas.get(id_fatura).clone();
+    }
+
+    /**
+     * Devolve um iterador para as faturas de um fornecedor.
+     * @return Iterator
+     */
+    public Iterator<Fatura> getFatura(String nome_fornecedor){
+        return this.faturas.values()
+                .stream()
+                .filter(fatura -> fatura.getFornecedor().equals(nome_fornecedor))
+                .map(Fatura::clone)
+                .toList()
+                .iterator();
     }
 
     public void emiteFaturas(LocalDateTime inicio , LocalDateTime fim){
@@ -57,32 +143,7 @@ public class Modelo implements Serializable{
         }
     }
 
-    public Iterator<Casa> getCasas() {
-        return this.casas.values().iterator();
-    }
-
-    public Iterator<Fatura> getFatura(String nome){
-        return this.faturas.values().stream().filter(fatura -> fatura.getFornecedor().equals(nome)).toList().iterator();
-    }
-
-    public Iterator<FornecedorEnergia> getFornecedor(Comparator<FornecedorEnergia> comp){
-        List<FornecedorEnergia> fornecedor = new ArrayList<>(this.fornecedores.values().stream().map(FornecedorEnergia::clone).toList());
-        fornecedor.sort(comp);
-        return fornecedor.iterator();
-    }
-
-    public Iterator<Casa> getCasas(LocalDateTime inicio , LocalDateTime fim){
-        List<Fatura> faturas = this.faturas.values().stream().filter(fatura -> fatura.getInicio().isBefore(fim) && fatura.getFim().isAfter(inicio)).map(Fatura::clone).toList();
-        Map<Double,Casa> casas = new TreeMap<>(new DoubleDecrescente());
-        for (Fatura fatura : faturas) {
-            casas.put(fatura.getTotalConsumo(),this.casas.get(fatura.getMorada()).clone());
-        }
-        return casas.values().iterator();
-    }
-
-    public Fatura getFatura(long id_fatura){
-        return this.faturas.get(id_fatura).clone();
-    }
+    //Setters
 
     public void setFornecedores(Collection<FornecedorEnergia> fornecedores) {
         HashMap<String,FornecedorEnergia> copia = new HashMap<>(fornecedores.size());
@@ -99,6 +160,31 @@ public class Modelo implements Serializable{
         }
         this.casas = copia;
     }
+
+    /**
+     * Faz o parse de uma lista de String de FornecedorEnergia
+     * @param list List
+     */
+    public void setFornecedores(List<String> list) {
+        for (String str : list) {
+            FornecedorEnergia fornecedor = FornecedorEnergia.parse(str);
+            this.fornecedores.put(fornecedor.getNome(),fornecedor);
+        }
+    }
+
+
+    /**
+     * Faz o parse de uma lista de String de Casa
+     * @param list List
+     */
+    public void setCasas(List<String> list) throws LinhaFormatadaInvalidaException, SmartDeviceInvalidoException, TonalidadeInvalidaException, EstadoInvalidoException {
+        for (String str : list) {
+            Casa casa = Casa.parse(str);
+            this.casas.put(casa.getMorada(),casa);
+        }
+    }
+
+    //Métodos de instância
 
     /**
      * Altera o estado de todos os aparelhos de todas as casas.
@@ -129,9 +215,9 @@ public class Modelo implements Serializable{
      * @param divisao Nome da divisão.
      * @param novo_estado Novo estado.
      * @throws CasaInexistenteException Quando não existe a casa.
-     * @throws DivisaoInexistenteException Quando não existe a divisão.
+     * @throws DivisaoNaoExisteException Quando não existe a divisão.
      */
-    public void alteraEstado(String morada , String divisao , SmartDevice.Estado novo_estado) throws CasaInexistenteException, DivisaoInexistenteException {
+    public void alteraEstado(String morada , String divisao , SmartDevice.Estado novo_estado) throws CasaInexistenteException, DivisaoNaoExisteException {
         if(this.casas.containsKey(morada)){
             this.casas.get(morada).alteraEstadoDivisao(divisao,novo_estado);
         }else{
@@ -139,70 +225,24 @@ public class Modelo implements Serializable{
         }
     }
 
-
-
-    public Map<FornecedorEnergia , Set<Fatura>> getFaturasFornecedor(String nome){
-        Map<FornecedorEnergia , Set<Fatura>> copia = new HashMap<>();
-
-        if(this.fornecedores.containsKey(nome)) {
-            for (FornecedorEnergia fornecedor : this.fornecedores.values()) {
-                Set<Fatura> faturas_fornecedor = new HashSet<>();
-
-                for (Fatura fatura : this.faturas.values()) {
-                    faturas_fornecedor.add(fatura.clone());
-                }
-
-                copia.put(fornecedor.clone(),faturas_fornecedor);
-            }
+    public AbstractMap.SimpleEntry<String , SmartDevice> removeDispositivo(String morada , String id_dispositivo) throws DispositivoNaoExisteException, DivisaoNaoExisteException, CasaInexistenteException {
+        SmartDevice dev;
+        String local;
+        Casa casa;
+        if(this.casas.containsKey(morada)){
+            casa = this.casas.get(morada);
+            local = casa.ondeEsta(id_dispositivo);
+            dev = casa.removeDispositivo(id_dispositivo,local);
+        }else{
+            throw new CasaInexistenteException();
         }
-
-        return  copia;
+        return new AbstractMap.SimpleEntry<String,SmartDevice>(local,dev);
     }
 
-    public Map<Double , Set<Casa>> consumoCasasEntreDatas(LocalDateTime inicio , LocalDateTime fim){
-        Map<Double , Set<Casa>> resposta = new TreeMap<>(new DoubleDecrescente());
-
-        for (Casa casa : this.casas.values()) {
-
-            double consumo = 0.0;
-            for (Long id_fatura : casa.getFaturas()) {
-
-                Fatura fatura = this.faturas.get(id_fatura);
-                if(fatura.getInicio().isBefore(fim) && fatura.getFim().isAfter(inicio)){
-                    consumo += fatura.getTotalConsumo();
-                }
-            }
-
-            if (consumo > 0){
-                if(resposta.containsKey(consumo)){
-                    resposta.get(consumo).add(casa.clone());
-                }else{
-                    Set<Casa> conjunto = new HashSet<Casa>();
-                    conjunto.add(casa.clone());
-                    resposta.put(consumo ,conjunto);
-                }
-            }
+    public void adicionaDispositivo(String casa , String divisao , SmartDevice device) throws DispositivoNaoExisteException {
+        if (this.casas.containsKey(casa)){
+            this.casas.get(casa).adicionaDispositivo(divisao,device);
         }
-
-        return resposta;
-    }
-
-    public void setFornecedores(List<String> list) {
-        for (String str : list) {
-            FornecedorEnergia fornecedor = FornecedorEnergia.parse(str);
-            this.fornecedores.put(fornecedor.getNome(),fornecedor);
-        }
-    }
-
-    public void setCasas(List<String> list) throws LinhaFormatadaInvalidaException, SmartDeviceInvalidoException, TonalidadeInvalidaException, EstadoInvalidoException {
-        for (String str : list) {
-            Casa casa = Casa.parse(str);
-            this.casas.put(casa.getMorada(),casa);
-        }
-    }
-
-    public Casa getCasa(String morada){
-        return this.casas.get(morada).clone();
     }
 
     @Override

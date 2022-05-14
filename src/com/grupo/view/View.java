@@ -39,7 +39,10 @@ public class View {
                         System.out.println(controlador.darHandler(menu_principal.getArg()));
                     }
                     case "bills" -> System.out.println(this.controlador.billHandler(menu_principal.getArg()));
-                    case "dev" -> this.controlador.devHandler(menu_principal.getArg());
+                    case "dev" -> {
+                        this.controlador.devHandler(menu_principal.getArg());
+                        System.out.println("Updated!");
+                    }
                     case "exit" -> {
                         menu_principal.finalizar();
                         controlador.guardaEstado("./bin/estado");

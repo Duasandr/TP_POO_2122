@@ -1,20 +1,30 @@
    <<<Sir Manuel>>>
 -------------------------------------------------
-| ld                      : Carregar dados (ficheiro binário)
-| ld -txt                 : Carregar dados (ficheiros de texto)
-| ld -rand                : Carregar com dados aleatórios
-| mod -allon              : Ligar todos os dispositivos
-| mod -allof              : Desligar todos os dispositivos
+| ld                          : Carregar dados (ficheiro binário)
+| ld -txt                     : Carregar dados (ficheiros de texto)
+| ld -rand                    : Carregar com dados aleatórios
+| mod -allon                  : Ligar todos os dispositivos
+| mod -allof                  : Desligar todos os dispositivos
 | mod -divon <casa> <divisao> : Ligar todos os aparelhos de uma divisão de uma casa
 | mod -divof <casa> <divisao> : Desligar todos os aparelhos de uma divisão de uma casa
-| dev -on <id> : Liga um dispositivo
-| dev -off <id> : Desliga um dispositivo
-| delorean <n> : Avança <n> dias no tempo
-| stat          : Apresenta o estado do simulador
-| stat -h       : Apresenta o estado das casas
-| stat -f       : Apresenta o estado dos fornecedores
-| mvp -h   : Apresenta a casa com maior consumo
-| mvp -f   : Apresenta o fornecedor com maior faturação
-| bills <fornecedor> : Listar faturas do fornecedor
-| dar <data inicio> <data fim> : "Dar" uma ordenação dos maiores consumidores
+| dev -on <id>                : Liga um dispositivo
+| dev -off <id>               : Desliga um dispositivo
+| delorean <n>                : Regressa <n> dias ao futuro
+| stat -all                   : Apresenta o estado do simulador
+| stat -h                     : Apresenta o estado das casas
+| stat -f                     : Apresenta o estado dos fornecedores
+| mvp -h                      : Apresenta a casa com maior consumo
+| mvp -f                      : Apresenta o fornecedor com maior faturação
+| bills <fornecedor>                      : Listar faturas do fornecedor
+| dar <data inicio> <data fim>            : "Dar" uma ordenação dos maiores consumidores
+| dev -on <casa> <id>               : Liga um dispositivo
+| dev -off <casa> <id>               : Desliga um dispositivo
+| dev -price <casa> <id> <preco>          : Muda o preco de instalação
+| dev -tone <casa> <id> <tone>            : Muda a tonalidade lâmpada
+| dev -dim <casa> <id> <dim>              : Muda a dimensão da lâmpada
+| dev -res <casa> <id> <res>              : Muda a resolução da câmara
+| dev -file <casa> <id> <tamanho>         : Muda o tamanho do ficheiro
+| dev -vol <casa> <id> <vol>              : Muda o volume da coluna
+| dev -max <casa> <id> <max>              : Muda o volume máximo da coluna
+| dev -cha <casa> <id> <canal>            : Muda o canal da coluna
 -------------------------------------------------

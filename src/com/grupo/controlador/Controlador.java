@@ -1,7 +1,10 @@
 package com.grupo.controlador;
 
 import com.grupo.comparators.FornecedorPorFaturacao;
+import com.grupo.device.SmartBulb;
+import com.grupo.device.SmartCamera;
 import com.grupo.device.SmartDevice;
+import com.grupo.device.SmartSpeaker;
 import com.grupo.exceptions.*;
 import com.grupo.generator.GeradorAleatorio;
 import com.grupo.house.Casa;
@@ -16,10 +19,9 @@ import java.nio.file.Paths;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.time.format.DateTimeFormatterBuilder;
+import java.util.AbstractMap;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Set;
 
 public class Controlador {
     private Modelo modelo;
@@ -85,7 +87,7 @@ public class Controlador {
 
     public String statusCasas(){
         StringBuilder sb = new StringBuilder();
-        Iterator<Casa> casas = this.modelo.getCasas();
+        Iterator<Casa> casas = this.modelo.getCasa();
         sb.append("Casas: {\n");
         while(casas.hasNext()) {
             sb.append("\t").append(casas.next().toString()).append("\n");
@@ -98,25 +100,34 @@ public class Controlador {
         return statusFornecedores() + statusCasas();
     }
 
-    public void loaderHandler(String[] op) throws IOException, ClassNotFoundException, LinhaFormatadaInvalidaException, OpcaoInvalidaException, SmartDeviceInvalidoException, TonalidadeInvalidaException, EstadoInvalidoException {
-        switch (op[1]){
+    public void loaderHandler(String[] args) throws IOException, ClassNotFoundException, LinhaFormatadaInvalidaException, OpcaoInvalidaException, SmartDeviceInvalidoException, TonalidadeInvalidaException, EstadoInvalidoException {
+        if(args.length > 1){
+        switch (args[1]){
             case "-bin" -> carregaFicheiroBinario();
             case "-txt" -> carregaDadosFicheiroTexto();
             case "-rand" -> geraDadosAleatorios(new GeradorAleatorio());
-            default -> throw new OpcaoInvalidaException(op[0]);
+            default -> throw new OpcaoInvalidaException(args[0]);
+        }
+        }else {
+            throw new OpcaoInvalidaException("man sim para qualquer duvida");
         }
     }
 
-    public String statusHandler(String[] op) throws OpcaoInvalidaException {
-        return switch (op[1]){
+    public String statusHandler(String[] args) throws OpcaoInvalidaException {
+        if(args.length > 1){
+        return switch (args[1]){
             case "-all" -> status();
             case "-f" -> statusFornecedores();
             case "-h" -> statusCasas();
-            default -> throw new OpcaoInvalidaException(op[0]);
+            default -> throw new OpcaoInvalidaException(args[0]);
         };
+        }else {
+            throw new OpcaoInvalidaException("man sim para qualquer duvida");
+        }
     }
 
-    public void modifyHandler(String[] args) throws OpcaoInvalidaException, CasaInexistenteException, DivisaoInexistenteException {
+    public void modifyHandler(String[] args) throws OpcaoInvalidaException, CasaInexistenteException, DivisaoNaoExisteException {
+        if(args.length > 1){
         switch (args[1]){
             case "-allon" -> this.modelo.alteraEstado(SmartDevice.Estado.LIGADO);
             case "-allof" -> this.modelo.alteraEstado(SmartDevice.Estado.DESLIGADO);
@@ -125,20 +136,98 @@ public class Controlador {
             case "-h" -> statusCasas();
             default -> throw new OpcaoInvalidaException(args[0]);
         }
+    }else {
+        throw new OpcaoInvalidaException("man sim para qualquer duvida");
+    }
     }
 
-    public String mvpHandler(String[] args) throws OpcaoInvalidaException {
-        return switch (args[1]){
-            case "-h" -> casaComMaiorDespesa();
-            case "-f" -> fornecedorComMaiorFaturacao();
-            default -> throw new OpcaoInvalidaException(args[0]);
-        };
+    public String mvpHandler(String[] args) throws OpcaoInvalidaException, DadosInsuficientesException {
+        if(args.length > 1){
+            if(this.dias > 0) {
+                return switch (args[1]) {
+                    case "-h" -> casaComMaiorDespesa();
+                    case "-f" -> fornecedorComMaiorFaturacao();
+                    default -> throw new OpcaoInvalidaException(args[0]);
+                };
+            }else{
+                throw new DadosInsuficientesException("Whoops");
+            }
+        }else {
+            throw new OpcaoInvalidaException("man sim para qualquer duvida");
+        }
     }
 
-    public void devHandler(String[] args) throws OpcaoInvalidaException {
+    public void devHandler(String[] args) throws OpcaoInvalidaException, CasaInexistenteException, DivisaoNaoExisteException, DispositivoNaoExisteException, TonalidadeInvalidaException, NaoEBulbException, NaoECamException, NaoESpeakException {
+        AbstractMap.SimpleEntry<String , SmartDevice> dev = this.modelo.removeDispositivo(args[2],args[3]);
         switch (args[1]){
-            case "-on" -> this.modelo.removeDispositivo();
-            case "-off" -> fornecedorComMaiorFaturacao();
+            case "-on" -> {
+                dev.getValue().setEstado(SmartDevice.Estado.LIGADO);
+                this.modelo.adicionaDispositivo(args[2], dev.getKey() , dev.getValue());
+            }
+            case "-off" -> {
+                dev.getValue().setEstado(SmartDevice.Estado.DESLIGADO);
+                this.modelo.adicionaDispositivo(args[2], dev.getKey() , dev.getValue());
+            }
+            case "-price" -> {
+                dev.getValue().setPrecoInstalacao(Double.parseDouble(args[4]));
+                this.modelo.adicionaDispositivo(args[2], dev.getKey() , dev.getValue());
+            }
+            case "-tone" -> {
+                if (dev.getValue() instanceof SmartBulb) {
+                    ((SmartBulb) dev.getValue()).setTonalidade(SmartBulb.parseTonalidade(args[4]));
+                } else {
+                    throw new NaoEBulbException(args[3]);
+                }
+                this.modelo.adicionaDispositivo(args[2], dev.getKey() , dev.getValue());
+            }
+            case "-dim" -> {
+                if(dev.getValue() instanceof SmartBulb){
+                    ((SmartBulb) dev.getValue()).setDimensao(Double.parseDouble(args[4]));
+                }else{
+                    throw new NaoEBulbException(args[3]);
+                }
+                this.modelo.adicionaDispositivo(args[2], dev.getKey() , dev.getValue());
+            }
+            case "-res" -> {
+                if(dev.getValue() instanceof SmartCamera){
+                    ((SmartCamera) dev.getValue()).setResolucao(Integer.parseInt(args[4]));
+                }else{
+                    throw new NaoECamException(args[3]);
+                }
+                this.modelo.adicionaDispositivo(args[2], dev.getKey() , dev.getValue());
+            }
+            case "-file" -> {
+                if(dev.getValue() instanceof SmartCamera){
+                    ((SmartCamera) dev.getValue()).setTamanhoFicheiro(Double.parseDouble(args[4]));
+                }else{
+                    throw new NaoECamException(args[3]);
+                }
+                this.modelo.adicionaDispositivo(args[2], dev.getKey() , dev.getValue());
+            }
+            case "-vol" -> {
+                if(dev.getValue() instanceof SmartSpeaker){
+                    ((SmartSpeaker) dev.getValue()).setVolume(Integer.parseInt(args[4]));
+                }else{
+                    throw new NaoESpeakException(args[3]);
+                }
+                this.modelo.adicionaDispositivo(args[2], dev.getKey() , dev.getValue());
+            }
+            case "-max" -> {
+                if(dev.getValue() instanceof SmartSpeaker){
+                    ((SmartSpeaker) dev.getValue()).setVolumeMaximo(Integer.parseInt(args[4]));
+                }else{
+                    throw new NaoESpeakException(args[3]);
+                }
+                this.modelo.adicionaDispositivo(args[2], dev.getKey() , dev.getValue());
+            }
+            case "-cha" -> {
+                if(dev.getValue() instanceof SmartSpeaker){
+                    ((SmartSpeaker) dev.getValue()).setCanal(args[4]);
+                }else{
+                    throw new NaoESpeakException(args[3]);
+                }
+                this.modelo.adicionaDispositivo(args[2], dev.getKey() , dev.getValue());
+            }
             default -> throw new OpcaoInvalidaException(args[0]);
         }
     }
@@ -152,7 +241,7 @@ public class Controlador {
 
     private String darOrdenacao(LocalDateTime inicio , LocalDateTime fim){
         StringBuilder sb = new StringBuilder();
-        Iterator<Casa> casas = this.modelo.getCasas(inicio,fim);
+        Iterator<Casa> casas = this.modelo.getCasa(inicio,fim);
 
         while(casas.hasNext()){
             sb.append(casas.next().toString()).append("\n");
@@ -176,7 +265,7 @@ public class Controlador {
     }
 
     public String casaComMaiorDespesa(){
-        Iterator<Casa> casas = this.modelo.getCasas();
+        Iterator<Casa> casas = this.modelo.getCasa();
         Casa mvp = casas.next();
         double max_despesa = this.modelo.getFatura(mvp.ultimaFatura()).getTotalAPagar();
 

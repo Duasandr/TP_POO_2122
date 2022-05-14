@@ -154,6 +154,21 @@ public class Divisao implements Serializable {
         }
     }
 
+    public SmartDevice removeDispositivo(String id_dispositivo) throws DispositivoNaoExisteException {
+        SmartDevice dev;
+        if(this.aparelhos.containsKey(id_dispositivo)){
+            dev = this.aparelhos.remove(id_dispositivo);
+        }else {
+            throw new DispositivoNaoExisteException(id_dispositivo);
+        }
+
+        return dev;
+    }
+
+    public void adicionaDispositivo(SmartDevice device){
+        this.aparelhos.put(device.getIdFabricante(),device.clone());
+    }
+
     //Métodos de classe
 
     /**
@@ -202,7 +217,7 @@ public class Divisao implements Serializable {
         final StringBuilder sb = new StringBuilder("Divisao{");
         sb.append("nome='").append(nome).append('\'');
         sb.append(", aparelhos=").append(aparelhos);
-        sb.append('}');
+        sb.append('}').append('\n');
         return sb.toString();
     }
 

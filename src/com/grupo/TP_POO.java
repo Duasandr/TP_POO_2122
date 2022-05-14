@@ -8,10 +8,14 @@ import com.grupo.exceptions.LinhaFormatadaInvalidaException;
 import java.io.IOException;
 
 public class TP_POO {
-    public static void main(String[] args) throws IOException, ClassNotFoundException, LinhaFormatadaInvalidaException {
+    public static void main(String[] args) {
         Modelo modelo = new Modelo();
         Controlador controlador = new Controlador(modelo);
-        View view = new View(controlador);
-        view.executa();
+        if(args.length > 2){
+
+        }else{
+            View view = new View(controlador);
+            view.executa();
+        }
     }
 }

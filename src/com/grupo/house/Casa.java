@@ -202,7 +202,7 @@ public class Casa implements Serializable {
      * @param id_dispositivo Identificador do aparelho.
      * @return  Divisão ou null caso não exista o aparelho.
      */
-    private Divisao ondeEsta(String id_dispositivo){
+    public String ondeEsta(String id_dispositivo) throws DispositivoNaoExisteException {
         boolean found = false;
         Divisao divisao = null;
 
@@ -211,7 +211,12 @@ public class Casa implements Serializable {
             divisao = i.next();
             found = divisao.contem(id_dispositivo);
         }
-        return divisao;
+
+        if (divisao == null){
+            throw new DispositivoNaoExisteException(id_dispositivo);
+        }
+
+        return divisao.getNome();
     }
 
     //Métodos de instância
@@ -230,11 +235,11 @@ public class Casa implements Serializable {
      * Altera todos os estados de todos os dispositivos da divisão.
      * @param novo_estado Novo estado a atribuir aos dispositivos.
      */
-    public void alteraEstadoDivisao(String divisao , SmartDevice.Estado novo_estado) throws DivisaoInexistenteException {
+    public void alteraEstadoDivisao(String divisao , SmartDevice.Estado novo_estado) throws DivisaoNaoExisteException {
         if(this.divisoes.containsKey(divisao)){
             this.divisoes.get(divisao).alteraEstado(novo_estado);
         }else{
-            throw new DivisaoInexistenteException();
+            throw new DivisaoNaoExisteException(divisao);
         }
     }
 
@@ -245,11 +250,9 @@ public class Casa implements Serializable {
      * @throws DispositivoNaoExisteException Acontece quando não existe um dispositivo.
      */
     public void alteraEstado(String id_dispositivo , SmartDevice.Estado novo_estado) throws DispositivoNaoExisteException {
-        Divisao local = ondeEsta(id_dispositivo);
+        String local = ondeEsta(id_dispositivo);
         if(local != null){
-            local.alteraEstado(id_dispositivo,novo_estado);
-        }else{
-            throw new DispositivoNaoExisteException(id_dispositivo);
+            this.divisoes.get(local).alteraEstado(id_dispositivo,novo_estado);
         }
     }
 
@@ -266,6 +269,32 @@ public class Casa implements Serializable {
      */
     public long ultimaFatura(){
         return ((TreeSet<Long>)this.id_faturas).last();
+    }
+
+    /**
+     * Remove um dispositivo da divisão da casa.
+     * @param id_dispositivo String
+     * @param divisao String
+     * @return SmartDevice removido
+     * @throws DispositivoNaoExisteException Quando não existe
+     * @throws DivisaoNaoExisteException Quando não existe
+     */
+    public SmartDevice removeDispositivo(String id_dispositivo , String divisao) throws DispositivoNaoExisteException, DivisaoNaoExisteException {
+        SmartDevice dev;
+        if(this.divisoes.containsKey(divisao)){
+            dev = this.divisoes.get(divisao).removeDispositivo(id_dispositivo);
+        }else{
+            throw new DivisaoNaoExisteException(divisao);
+        }
+        return dev;
+    }
+
+    public void adicionaDispositivo(String div , SmartDevice device) throws DispositivoNaoExisteException {
+        if(this.divisoes.containsKey(div)){
+            this.divisoes.get(div).adicionaDispositivo(device);
+        }else{
+            throw new DispositivoNaoExisteException(div);
+        }
     }
 
     //Métodos de Object
