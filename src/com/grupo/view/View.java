@@ -28,12 +28,18 @@ public class View {
                         this.controlador.modifyHandler(menu_principal.getArg());
                         System.out.println("Message received.");
                     }
-                    case "dev" -> {
-
+                    case "delorean" -> {
+                        System.out.println("Flux capacitor... check!");
+                        this.controlador.deloreanHandler(menu_principal.getArg());
+                        System.out.println("Great Scott!!!!");
                     }
                     case "mvp" -> {
                         System.out.println(controlador.mvpHandler(menu_principal.getArg()));
+                    }case "dar" -> {
+                        System.out.println(controlador.darHandler(menu_principal.getArg()));
                     }
+                    case "bills" -> System.out.println(this.controlador.billHandler(menu_principal.getArg()));
+                    case "dev" -> this.controlador.devHandler(menu_principal.getArg());
                     case "exit" -> {
                         menu_principal.finalizar();
                         controlador.guardaEstado("./bin/estado");

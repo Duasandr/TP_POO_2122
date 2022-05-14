@@ -11,14 +11,13 @@ import com.grupo.power.FuncaoConsumo;
 import java.io.*;
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class Modelo implements Serializable{
     // Variáveis de instância
     private Map<String , FornecedorEnergia> fornecedores;
     private Map<String , Casa> casas;
     private Map<Long , Fatura> faturas;
-
-    private static LocalDateTime instante_no_tempo = LocalDateTime.now();
 
     //Construtores
 
@@ -42,20 +41,47 @@ public class Modelo implements Serializable{
         this.setCasas(casas);
     }
 
-    public Set<FornecedorEnergia> getFornecedores() {
-        Set<FornecedorEnergia> copia = new HashSet<>(this.fornecedores.size());
-        for (FornecedorEnergia fornecedor : this.fornecedores.values()) {
-            copia.add(fornecedor.clone());
-        }
-        return copia;
+    public Iterator<FornecedorEnergia> getFornecedor() {
+        return this.fornecedores.values().iterator();
     }
 
-    public Set<Casa> getCasas() {
-        Set<Casa> copia = new HashSet<>(this.casas.size());
+    public FornecedorEnergia getFornecedor(Casa casa){
+        return this.fornecedores.get(casa.getFornecedor()).clone();
+    }
+
+    public void emiteFaturas(LocalDateTime inicio , LocalDateTime fim){
         for (Casa casa : this.casas.values()) {
-            copia.add(casa.clone());
+            FornecedorEnergia fornecedor = this.fornecedores.get(casa.getFornecedor());
+            Fatura fatura = new Fatura(casa , fornecedor , inicio , fim);
+            this.faturas.put(fatura.getId(), fatura);
         }
-        return copia;
+    }
+
+    public Iterator<Casa> getCasas() {
+        return this.casas.values().iterator();
+    }
+
+    public Iterator<Fatura> getFatura(String nome){
+        return this.faturas.values().stream().filter(fatura -> fatura.getFornecedor().equals(nome)).toList().iterator();
+    }
+
+    public Iterator<FornecedorEnergia> getFornecedor(Comparator<FornecedorEnergia> comp){
+        List<FornecedorEnergia> fornecedor = new ArrayList<>(this.fornecedores.values().stream().map(FornecedorEnergia::clone).toList());
+        fornecedor.sort(comp);
+        return fornecedor.iterator();
+    }
+
+    public Iterator<Casa> getCasas(LocalDateTime inicio , LocalDateTime fim){
+        List<Fatura> faturas = this.faturas.values().stream().filter(fatura -> fatura.getInicio().isBefore(fim) && fatura.getFim().isAfter(inicio)).map(Fatura::clone).toList();
+        Map<Double,Casa> casas = new TreeMap<>(new DoubleDecrescente());
+        for (Fatura fatura : faturas) {
+            casas.put(fatura.getTotalConsumo(),this.casas.get(fatura.getMorada()).clone());
+        }
+        return casas.values().iterator();
+    }
+
+    public Fatura getFatura(long id_fatura){
+        return this.faturas.get(id_fatura).clone();
     }
 
     public void setFornecedores(Collection<FornecedorEnergia> fornecedores) {
@@ -72,16 +98,6 @@ public class Modelo implements Serializable{
             copia.put(casa.getMorada() , casa.clone());
         }
         this.casas = copia;
-    }
-
-    private static void saltaPara(LocalDateTime destino){
-        instante_no_tempo = destino;
-    }
-
-    public void avancaNoTempo(long dias){
-        LocalDateTime destino = instante_no_tempo.plusDays(dias);
-        emiteFaturas(destino);
-        saltaPara(destino);
     }
 
     /**
@@ -123,56 +139,7 @@ public class Modelo implements Serializable{
         }
     }
 
-    public void alteraFornecedorPrecoBase(String fornecedor , double novo_valor){
-        if(this.fornecedores.containsKey(fornecedor)){
-            this.fornecedores.get(fornecedor).setValorBase(novo_valor);
-        }
-    }
 
-    public void alteraFuncaoConsumo(String fornecedor , String funcao){
-        if(this.fornecedores.containsKey(fornecedor)){
-            this.fornecedores.get(fornecedor).setFuncaoConsumo(FuncaoConsumo.parse(funcao));
-        }
-    }
-
-    public void emiteFaturas(LocalDateTime fim){
-        for (Casa casa : this.casas.values()) {
-            Fatura fatura = Fatura.emiteFatura(casa,this.fornecedores.get(casa.getFornecedor()),instante_no_tempo,fim);
-            this.faturas.put(fatura.getId(),fatura);
-        }
-    }
-
-    public Casa casaComMaiorDespesa(){
-        double max_despesa = 0.0;
-        Casa maior_despesa = null;
-
-        for (Casa casa : this.casas.values()) {
-            Fatura fatura = this.faturas.get(casa.ultimaFatura());
-            double despesa = fatura.getTotalAPagar();
-
-            if(despesa > max_despesa){
-                max_despesa = despesa;
-                maior_despesa = casa;
-            }
-        }
-        assert maior_despesa != null;
-        return maior_despesa.clone();
-    }
-
-    public FornecedorEnergia fornecedorComMaiorFaturacao(){
-        double max_faturacao = 0.0;
-        FornecedorEnergia maior_faturacao = null;
-
-        for (FornecedorEnergia fornecedor : this.fornecedores.values()) {
-
-            double faturacao = fornecedor.getFaturacao();
-            if(faturacao > max_faturacao){
-                max_faturacao = faturacao;
-                maior_faturacao = fornecedor;
-            }
-        }
-        return maior_faturacao == null ? null : maior_faturacao.clone();
-    }
 
     public Map<FornecedorEnergia , Set<Fatura>> getFaturasFornecedor(String nome){
         Map<FornecedorEnergia , Set<Fatura>> copia = new HashMap<>();

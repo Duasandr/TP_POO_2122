@@ -27,7 +27,7 @@ public class Menu {
     }
 
     public String getOpcao(){
-        return this.opcao;
+        return this.args[0];
     }
     public String[] getArg(){
         return this.args;
@@ -38,11 +38,7 @@ public class Menu {
     }
 
     public void executa() throws IOException {
-        String[] tokens = this.input.nextLine().split(" ");
-        this.args = tokens;
-        if(tokens.length > 0){
-            this.opcao = tokens[0];
-        }
+        this.args = this.input.nextLine().split(" ");
     }
 
     public void finalizar(){

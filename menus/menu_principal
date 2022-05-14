@@ -9,6 +9,7 @@
 | mod -divof <casa> <divisao> : Desligar todos os aparelhos de uma divisão de uma casa
 | dev -on <id> : Liga um dispositivo
 | dev -off <id> : Desliga um dispositivo
+| delorean <n> : Avança <n> dias no tempo
 | stat          : Apresenta o estado do simulador
 | stat -h       : Apresenta o estado das casas
 | stat -f       : Apresenta o estado dos fornecedores

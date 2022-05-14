@@ -296,20 +296,24 @@ public class Casa implements Serializable {
         return new Casa(this);
     }
 
+    @Override
+    public String toString() {
+        return new StringJoiner(", ", Casa.class.getSimpleName() + "[", "]")
+                .add("morada='" + morada + "'")
+                .add("proprietario='" + proprietario + "'")
+                .add("fornecedor='" + fornecedor + "'")
+                .add("nif_proprietario=" + nif_proprietario)
+                .add("divisoes=" + divisoes)
+                .add("id_faturas=" + id_faturas)
+                .toString();
+    }
+
     /**
      * Representação textual de uma casa.
      * @return String.
      */
-    @Override
-    public String toString() {
-        final StringBuilder sb = new StringBuilder("Casa{");
-        sb.append("morada='").append(morada).append('\'');
-        sb.append(", proprietario='").append(proprietario).append('\'');
-        sb.append(", nif_proprietario=").append(nif_proprietario);
-        sb.append(", divisoes=").append(divisoes);
-        sb.append('}');
-        return sb.toString();
-    }
+
+
 
     @Override
     public int hashCode() {

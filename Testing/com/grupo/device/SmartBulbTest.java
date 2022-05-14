@@ -5,6 +5,10 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 class SmartBulbTest {
@@ -71,6 +75,8 @@ class SmartBulbTest {
 
     @Test
     void testClone() {
+        DateTimeFormatter f = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+        System.out.println(LocalDate.parse("2022-05-01",f));
     }
 
     @Test

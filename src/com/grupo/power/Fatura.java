@@ -23,13 +23,17 @@ public class Fatura implements Serializable {
 
     private static long proximo_id = 0;
 
+    private static void atualizaProximoId(){
+        proximo_id = proximo_id + 1;
+    }
+
     //Construtores
 
     /**
      * Construtor vazio.
      */
     public Fatura(){
-        this.id = proximo_id++;
+        this.id = proximo_id;
     }
 
     public Fatura(String morada , String fornecedor, double total_a_pagar , double total_consumo,LocalDateTime inicio,LocalDateTime fim){
@@ -40,6 +44,7 @@ public class Fatura implements Serializable {
         this.total_consumo = total_consumo;
         this.inicio = inicio;
         this.fim = fim;
+        atualizaProximoId();
     }
 
     /**
@@ -50,6 +55,8 @@ public class Fatura implements Serializable {
      */
     public Fatura(Casa casa , FornecedorEnergia fornecedor ,LocalDateTime inicio , LocalDateTime fim){
         this(casa.getMorada(), fornecedor.getNome(), fornecedor.calculaValorPagar(casa), casa.getConsumoEnergia(), inicio,fim);
+        casa.guardaFatura(this.id);
+        fornecedor.atualizaFaturacao(this.total_a_pagar);
     }
 
     /**
@@ -73,6 +80,9 @@ public class Fatura implements Serializable {
     public String getFornecedor() {
         return this.fornecedor;
     }
+    public String getMorada() {
+        return this.morada;
+    }
 
     public double getTotalAPagar() {
         return this.total_a_pagar;
@@ -92,8 +102,7 @@ public class Fatura implements Serializable {
 
     public static Fatura emiteFatura(Casa casa,FornecedorEnergia fornecedor,LocalDateTime inicio , LocalDateTime fim){
         Fatura fatura = new Fatura(casa,fornecedor,inicio,fim);
-        casa.guardaFatura(fatura.id);
-        fornecedor.atualizaFaturacao(fatura.total_a_pagar);
+
         return fatura;
     }
 

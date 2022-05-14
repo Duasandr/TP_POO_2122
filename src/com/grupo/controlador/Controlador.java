@@ -1,21 +1,29 @@
 package com.grupo.controlador;
 
+import com.grupo.comparators.FornecedorPorFaturacao;
 import com.grupo.device.SmartDevice;
 import com.grupo.exceptions.*;
 import com.grupo.generator.GeradorAleatorio;
 import com.grupo.house.Casa;
 import com.grupo.model.Modelo;
+import com.grupo.power.Fatura;
 import com.grupo.power.FornecedorEnergia;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeFormatterBuilder;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
 public class Controlador {
     private Modelo modelo;
+    private long dias;
 
     public Controlador(Modelo modelo){
         this.modelo = modelo;
@@ -66,23 +74,23 @@ public class Controlador {
 
     public String statusFornecedores(){
         StringBuilder sb = new StringBuilder();
-        Set<FornecedorEnergia> fornnecedores = this.modelo.getFornecedores();
+        Iterator<FornecedorEnergia> fornecedores = this.modelo.getFornecedor();
         sb.append("Fornecedores: {\n");
-        for (FornecedorEnergia fornecedor : fornnecedores) {
-            sb.append("\t").append(fornecedor.toString()).append("\n");
+        while(fornecedores.hasNext()) {
+            sb.append("\t").append(fornecedores.next().toString()).append("\n");
         }
-        sb.append("}");
+        sb.append("}\n");
         return sb.toString();
     }
 
     public String statusCasas(){
         StringBuilder sb = new StringBuilder();
-        Set<Casa> casas = this.modelo.getCasas();
+        Iterator<Casa> casas = this.modelo.getCasas();
         sb.append("Casas: {\n");
-        for (Casa casa : casas) {
-            sb.append("\t").append(casa.toString()).append("\n");
+        while(casas.hasNext()) {
+            sb.append("\t").append(casas.next().toString()).append("\n");
         }
-        sb.append("}");
+        sb.append("}\n");
         return sb.toString();
     }
 
@@ -119,20 +127,88 @@ public class Controlador {
         }
     }
 
-    public String mvpHandler(String[] args) {
+    public String mvpHandler(String[] args) throws OpcaoInvalidaException {
         return switch (args[1]){
-            case "-h" -> this.modelo.casaComMaiorDespesa().getMorada().toString();
-            default -> "";
+            case "-h" -> casaComMaiorDespesa();
+            case "-f" -> fornecedorComMaiorFaturacao();
+            default -> throw new OpcaoInvalidaException(args[0]);
         };
     }
 
-
-    public String fornecedorComMaiorFaturacao(){
-        FornecedorEnergia fornecedor = this.modelo.fornecedorComMaiorFaturacao();
-        return fornecedor.getNome() + "\n Faturação: " + fornecedor.getFaturacao();
+    public void devHandler(String[] args) throws OpcaoInvalidaException {
+        switch (args[1]){
+            case "-on" -> this.modelo.removeDispositivo();
+            case "-off" -> fornecedorComMaiorFaturacao();
+            default -> throw new OpcaoInvalidaException(args[0]);
+        }
     }
 
-    public void avancaNoTempo(int dias){
-        this.modelo.avancaNoTempo(dias);
+    public void avancaNoTempo(long dias){
+        LocalDateTime inicio = LocalDateTime.now().plusDays(this.dias);
+        this.dias += dias;
+        LocalDateTime fim = LocalDateTime.now().plusDays(this.dias);
+        this.modelo.emiteFaturas(inicio , fim);
+    }
+
+    private String darOrdenacao(LocalDateTime inicio , LocalDateTime fim){
+        StringBuilder sb = new StringBuilder();
+        Iterator<Casa> casas = this.modelo.getCasas(inicio,fim);
+
+        while(casas.hasNext()){
+            sb.append(casas.next().toString()).append("\n");
+        }
+        sb.append("}");
+
+        return sb.toString();
+    }
+
+    public String darHandler(String[] args) throws OpcaoInvalidaException {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+        return darOrdenacao(LocalDateTime.from(LocalDate.parse(args[1] , formatter).atStartOfDay()), LocalDateTime.from(LocalDate.parse(args[2] , formatter).atStartOfDay()));
+    }
+
+    public String billHandler(String[] args){
+        return listarFaturasFornecedor(args[1]);
+    }
+
+    public void deloreanHandler(String[] args){
+        avancaNoTempo(Long.parseLong(args[1]));
+    }
+
+    public String casaComMaiorDespesa(){
+        Iterator<Casa> casas = this.modelo.getCasas();
+        Casa mvp = casas.next();
+        double max_despesa = this.modelo.getFatura(mvp.ultimaFatura()).getTotalAPagar();
+
+        while(casas.hasNext()) {
+            Casa casa = casas.next();
+            Fatura fatura = this.modelo.getFatura(casa.ultimaFatura());
+            double despesa = fatura.getTotalAPagar();
+
+            if(despesa > max_despesa){
+                max_despesa = despesa;
+                mvp = casa;
+            }
+        }
+
+        return "Casa: " + mvp.getMorada() + "\nDespesa: " + max_despesa;
+    }
+
+    public String fornecedorComMaiorFaturacao(){
+        Iterator<FornecedorEnergia> fornecedores = this.modelo.getFornecedor(new FornecedorPorFaturacao());
+        FornecedorEnergia mvp = fornecedores.next();
+        return "Fornecedor: " + mvp.getNome() + "\nFaturação: " + mvp.getFaturacao();
+    }
+
+    public String listarFaturasFornecedor(String nome){
+        StringBuilder sb = new StringBuilder("Fornecedor: " + nome + "{\n");
+        Iterator<Fatura> faturas = this.modelo.getFatura(nome);
+
+        while(faturas.hasNext()){
+            sb.append(faturas.next().toString()).append("\n");
+        }
+        sb.append("}");
+
+        return sb.toString();
     }
 }

@@ -1,6 +1,9 @@
 package com.grupo.house;
 
+import com.grupo.exceptions.EstadoInvalidoException;
 import com.grupo.exceptions.LinhaFormatadaInvalidaException;
+import com.grupo.exceptions.SmartDeviceInvalidoException;
+import com.grupo.exceptions.TonalidadeInvalidaException;
 import org.junit.jupiter.api.Test;
 
 class DivisaoTest {
@@ -62,7 +65,7 @@ class DivisaoTest {
     }
 
     @Test
-    void testParse() throws LinhaFormatadaInvalidaException {
+    void testParse() throws LinhaFormatadaInvalidaException, SmartDeviceInvalidoException, TonalidadeInvalidaException, EstadoInvalidoException {
         Divisao divisao = Divisao.parse("Sala[Speaker:12345;desligado;12.00;25;MEGA;100 Camera:8927;ligado;12.00;1024;50.0");
         System.out.println(divisao);
     }
