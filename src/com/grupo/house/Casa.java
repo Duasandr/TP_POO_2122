@@ -15,7 +15,7 @@ public class Casa implements Serializable {
     private String fornecedor;
     private int nif_proprietario;
     private Map<String , Divisao> divisoes;
-    private Set<Long> id_faturas;
+    private long ultima_fatura;
 
     //Construtores
 
@@ -31,19 +31,18 @@ public class Casa implements Serializable {
      * @param nif_proprietario Número de identificação fiscal do proprietário.
      * @param divisoes Divisões da casa.
      */
-    public Casa(String proprietario,String morada , int nif_proprietario , Collection<Divisao> divisoes , String fornecedor , Set<Long> id_faturas){
+    public Casa(String proprietario,String morada , int nif_proprietario , Collection<Divisao> divisoes , String fornecedor , long fatura){
         this.proprietario = proprietario;
         this.nif_proprietario = nif_proprietario;
         this.fornecedor = fornecedor;
         this.morada = morada;
         this.divisoes = new HashMap<>();
-        this.id_faturas = new TreeSet<>();
+        this.ultima_fatura = fatura;
         this.setDivisoes(divisoes);
-        this.setFaturas(id_faturas);
     }
 
     public Casa(Casa casa){
-        this(casa.proprietario , casa.morada, casa.nif_proprietario, casa.divisoes.values(), casa.fornecedor , casa.id_faturas);
+        this(casa.proprietario , casa.morada, casa.nif_proprietario, casa.divisoes.values(), casa.fornecedor , casa.ultima_fatura);
     }
 
     //Métodos de instância
@@ -95,11 +94,6 @@ public class Casa implements Serializable {
             }
             this.divisoes = copia;
         }
-    }
-
-    public void setFaturas(Collection<Long> id_faturas){
-        this.id_faturas = new TreeSet<>();
-        this.id_faturas.addAll(id_faturas);
     }
 
     //Getters
@@ -174,15 +168,6 @@ public class Casa implements Serializable {
     public String getFornecedor() {
         return this.fornecedor;
     }
-
-    /**
-     * Devolve um array com os identificadores de faturas emitidas
-     * @return Array de faturas emitidas.
-     */
-    public Set<Long> getFaturas(){
-        return new TreeSet<>(this.id_faturas);
-    }
-
 
     //Métodos auxiliares
 
@@ -260,7 +245,7 @@ public class Casa implements Serializable {
      * Guarda o identificador da fatura emitida..
      */
     public void guardaFatura(long id_fatura){
-        this.id_faturas.add(id_fatura);
+        this.ultima_fatura=id_fatura;
     }
 
     /**
@@ -268,7 +253,7 @@ public class Casa implements Serializable {
      * @return Identificador da última fatura.
      */
     public long ultimaFatura(){
-        return ((TreeSet<Long>)this.id_faturas).last();
+        return ultima_fatura;
     }
 
     /**
@@ -333,7 +318,7 @@ public class Casa implements Serializable {
                 .add("fornecedor='" + fornecedor + "'")
                 .add("nif_proprietario=" + nif_proprietario)
                 .add("divisoes=" + divisoes)
-                .add("id_faturas=" + id_faturas)
+                .add("id_faturas=" + ultima_fatura)
                 .toString();
     }
 

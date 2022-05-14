@@ -61,7 +61,7 @@ public class GeradorAleatorio {
         int n = Math.abs(random.nextInt(20) + 1);
         HashSet<Casa> casas = new HashSet<>(n);
         for (int i = 0; i < n; i++) {
-            Casa casa = new Casa("Pessoa"+id_pessoa++,"Casa"+id_casa++,1200+id_pessoa,geraDivisoes(),"null",new HashSet<Long>());
+            Casa casa = new Casa("Pessoa"+id_pessoa++,"Casa"+id_casa++,1200+id_pessoa,geraDivisoes(),"null",-1);
             casas.add(casa);
         }
         this.casas = casas;

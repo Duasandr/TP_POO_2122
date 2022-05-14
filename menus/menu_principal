@@ -17,8 +17,8 @@
 | mvp -f                      : Apresenta o fornecedor com maior faturação
 | bills <fornecedor>                      : Listar faturas do fornecedor
 | dar <data inicio> <data fim>            : "Dar" uma ordenação dos maiores consumidores
-| dev -on <casa> <id>               : Liga um dispositivo
-| dev -off <casa> <id>               : Desliga um dispositivo
+| dev -on <casa> <id>                     : Liga um dispositivo
+| dev -off <casa> <id>                    : Desliga um dispositivo
 | dev -price <casa> <id> <preco>          : Muda o preco de instalação
 | dev -tone <casa> <id> <tone>            : Muda a tonalidade lâmpada
 | dev -dim <casa> <id> <dim>              : Muda a dimensão da lâmpada

@@ -1,6 +1,5 @@
 package com.grupo.power;
 
-import com.grupo.comparators.FaturaPorId;
 import com.grupo.house.Casa;
 
 import java.io.Serializable;
@@ -14,11 +13,6 @@ public class FornecedorEnergia implements Serializable {
     private double imposto;
     private FuncaoConsumo funcao_consumo;
     private double faturacao;
-
-    //Variáveis de classe
-
-    private static final double valor_base_por_omissao = 0.13;
-    private static final double imposto_por_omissao = 0.06;
 
     //Construtores
 
@@ -51,7 +45,6 @@ public class FornecedorEnergia implements Serializable {
      * @param funcao_consumo Função que calcula o valor total a pagar.
      */
     public FornecedorEnergia(String nome , double valor_base , double imposto , FuncaoConsumo funcao_consumo, double faturacao){
-        this();
         this.nome = nome;
         this.valor_base = valor_base;
         this.imposto = imposto;

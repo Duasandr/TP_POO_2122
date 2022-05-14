@@ -12,6 +12,11 @@ public class Menu {
     private String[] args;
     private String ficheiro_texto;
 
+    public
+    Menu ( ) {
+
+    }
+
     public Menu(String path){
         this.input = new Scanner(System.in);
         this.ficheiro_texto = path;

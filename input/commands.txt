@@ -1,0 +1,7 @@
+ld -rand
+mod -allon
+stat -h
+stat -f
+mod -allof
+delorean 5
+mvp -h
