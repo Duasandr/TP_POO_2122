@@ -4,24 +4,25 @@ import com.grupo.exceptions.EstadoInvalidoException;
 
 import java.io.Serializable;
 import java.util.Objects;
+import java.util.StringJoiner;
 
 
 /**
  * Class SmartSpeaker
  */
-public class SmartSpeaker extends SmartDevice implements Serializable {
-    // Variáveis de instância
-    private String canal;
-    private int volume_max;
-    private int volume;
+public
+class SmartSpeaker extends SmartDevice {
     private static final double valor_fixo = 0.4;
 
-    //Construtores
+    private String canal;
+    private int    volume_max;
+    private int    volume;
 
     /**
      * Construtor Vazio
      */
-    public SmartSpeaker() {
+    public
+    SmartSpeaker ( ) {
     }
 
     /**
@@ -34,10 +35,11 @@ public class SmartSpeaker extends SmartDevice implements Serializable {
      * @param canal            Canal atual do aparelho.
      * @param volume_max       Volume máximo do aparelho.
      */
-    public SmartSpeaker(String id, Estado estado, double preco_instalacao, int volume, String canal, int volume_max) {
-        super(id, estado, preco_instalacao);
-        this.volume = volume;
-        this.canal = canal;
+    public
+    SmartSpeaker ( String id , Estado estado , double preco_instalacao , int volume , String canal , int volume_max ) {
+        super ( id , estado , preco_instalacao );
+        this.volume     = volume;
+        this.canal      = canal;
         this.volume_max = volume_max;
     }
 
@@ -46,50 +48,52 @@ public class SmartSpeaker extends SmartDevice implements Serializable {
      *
      * @param speaker Aparelho a ser copiado.
      */
-    public SmartSpeaker(SmartSpeaker speaker) {
-        this(speaker.getIdFabricante(), speaker.getEstado(), speaker.getPrecoInstalacao(), speaker.volume, speaker.canal, speaker.volume_max);
+    public
+    SmartSpeaker ( SmartSpeaker speaker ) {
+        this ( speaker.getIdFabricante ( ) , speaker.getEstado ( ) , speaker.getPrecoInstalacao ( ) , speaker.volume , speaker.canal , speaker.volume_max );
     }
 
-    //Métodos de instância
-
-    //Getters
+    /**
+     * Transforma uma String num SmartSpeaker
+     *
+     * @param tokens String[]
+     * @return SmartSpeaker
+     * @throws EstadoInvalidoException Quando um estado não é reconhecido.
+     */
+    public static
+    SmartSpeaker parse ( String[] tokens ) throws EstadoInvalidoException {
+        return new SmartSpeaker ( tokens[ 0 ] , SmartDevice.parseEstado ( tokens[ 1 ] ) , Double.parseDouble ( tokens[ 2 ] ) , Integer.parseInt ( tokens[ 3 ] ) , tokens[ 4 ] , Integer.parseInt ( tokens[ 5 ] ) );
+    }
 
     /**
      * Devolve o volume atual do aparelho selecionado.
      *
      * @return Volume do aparelho.
      */
-    public int getVolume() {
+    public
+    int getVolume ( ) {
         return this.volume;
     }
-
-    /**
-     * Devolve o canal que está a tocar no aparelho.
-     *
-     * @return Canal.
-     */
-    public String getCanal() {
-        return this.canal;
-    }
-
-    /**
-     * Devolve o volume máximo do aparelho selecionado.
-     *
-     * @return Volume máximo.
-     */
-    public int getVolumeMaximo() {
-        return this.volume_max;
-    }
-
-    //Setters
 
     /**
      * Define o volume do aparelho selecionado.
      *
      * @param volume Volume do aparelho.
      */
-    public void setVolume(int volume) {
+    public
+    void setVolume ( int volume ) {
         this.volume = volume >= 0 && volume <= this.volume_max ? volume : this.volume;
+    }
+
+
+    /**
+     * Devolve o canal que está a tocar no aparelho.
+     *
+     * @return Canal.
+     */
+    public
+    String getCanal ( ) {
+        return this.canal;
     }
 
     /**
@@ -97,8 +101,19 @@ public class SmartSpeaker extends SmartDevice implements Serializable {
      *
      * @param canal Canal.
      */
-    public void setCanal(String canal) {
+    public
+    void setCanal ( String canal ) {
         this.canal = canal;
+    }
+
+    /**
+     * Devolve o volume máximo do aparelho selecionado.
+     *
+     * @return Volume máximo.
+     */
+    public
+    int getVolumeMaximo ( ) {
+        return this.volume_max;
     }
 
     /**
@@ -106,11 +121,10 @@ public class SmartSpeaker extends SmartDevice implements Serializable {
      *
      * @param volume_max Volume máximo do aparelho.
      */
-    public void setVolumeMaximo(int volume_max) {
+    public
+    void setVolumeMaximo ( int volume_max ) {
         this.volume_max = volume_max;
     }
-
-    //Métodos Interface
 
     /**
      * Devolve o consumo de energia do aparelho.
@@ -118,17 +132,9 @@ public class SmartSpeaker extends SmartDevice implements Serializable {
      * @return Energia consumida pelo aparelho.
      */
     @Override
-    public double getConsumoEnergia() {
-        return this.getEstado() == Estado.LIGADO ? valor_fixo + 0.5 * this.volume : 0.0;
-    }
-
-    public static SmartSpeaker parse(String[] tokens) throws EstadoInvalidoException {
-        return new SmartSpeaker(tokens[0],
-                SmartDevice.parseEstado(tokens[1]),
-                Double.parseDouble(tokens[2]),
-                Integer.parseInt(tokens[3]),
-                tokens[4],
-                Integer.parseInt(tokens[5]));
+    public
+    double getConsumoEnergia ( ) {
+        return this.getEstado ( ) == Estado.LIGADO ? valor_fixo + 0.5 * this.volume * 0.001 : 0.0;
     }
 
     /**
@@ -137,8 +143,9 @@ public class SmartSpeaker extends SmartDevice implements Serializable {
      * @return Aparelho clonado.
      */
     @Override
-    public SmartSpeaker clone() {
-        return new SmartSpeaker(this);
+    public
+    SmartSpeaker clone ( ) {
+        return new SmartSpeaker ( this );
     }
 
     /**
@@ -148,15 +155,11 @@ public class SmartSpeaker extends SmartDevice implements Serializable {
      * @return Verdadeiro ou Falso.
      */
     @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof SmartSpeaker speaker)) return false;
-        return this.getIdFabricante().equals(speaker.getIdFabricante()) &&
-                this.getEstado().equals(speaker.getEstado()) &&
-                Double.compare(this.getPrecoInstalacao(), speaker.getPrecoInstalacao()) == 0 &&
-                this.volume_max == speaker.volume_max &&
-                this.volume == speaker.volume &&
-                this.canal.equals(speaker.canal);
+    public
+    boolean equals ( Object o ) {
+        if ( this == o ) return true;
+        if ( ! ( o instanceof SmartSpeaker speaker ) ) return false;
+        return this.getIdFabricante ( ).equals ( speaker.getIdFabricante ( ) ) && this.getEstado ( ).equals ( speaker.getEstado ( ) ) && Double.compare ( this.getPrecoInstalacao ( ) , speaker.getPrecoInstalacao ( ) ) == 0 && this.volume_max == speaker.volume_max && this.volume == speaker.volume && this.canal.equals ( speaker.canal );
     }
 
     /**
@@ -165,8 +168,9 @@ public class SmartSpeaker extends SmartDevice implements Serializable {
      * @return Indice
      */
     @Override
-    public int hashCode() {
-        return Objects.hash(this.getIdFabricante());
+    public
+    int hashCode ( ) {
+        return Objects.hash ( this.getIdFabricante ( ) );
     }
 
     /**
@@ -175,10 +179,15 @@ public class SmartSpeaker extends SmartDevice implements Serializable {
      * @return Representação do objeto.
      */
     @Override
-    public String toString() {
-        return super.toString() + "{ Volume: " + this.getVolume() +
-                ", Canal: " + this.getCanal() +
-                ", Volume Máximo: " + this.getVolumeMaximo() +
-                " }";
+    public
+    String toString ( ) {
+        return new StringJoiner ( ", " , SmartSpeaker.class.getSimpleName ( ) + "[" , "]" )
+                .add ( "ID='" + this.getIdFabricante ( ) + "'" )
+                .add ( "estado=" + this.getEstado ( ).toString ( ) )
+                .add ( "preco_instalacao=" + getPrecoInstalacao ( ) )
+                .add ( "canal='" + canal + "'" )
+                .add ( "volume_max=" + volume_max )
+                .add ( "volume=" + volume )
+                .toString ( );
     }
 }

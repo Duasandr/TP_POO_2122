@@ -4,18 +4,21 @@ import com.grupo.exceptions.EstadoInvalidoException;
 
 import java.io.Serializable;
 import java.util.Objects;
+import java.util.StringJoiner;
 
-public class SmartCamera extends SmartDevice implements Serializable {
-    //Variáveis de instância
-    private int resolucao;
+public
+class SmartCamera extends SmartDevice {
+
+    private int    resolucao;
     private double tamanho_ficheiro;
 
-    //Construtores
+
 
     /**
      * Construtor vazio
      */
-    protected SmartCamera() {
+    public
+    SmartCamera ( ) {
 
     }
 
@@ -28,9 +31,10 @@ public class SmartCamera extends SmartDevice implements Serializable {
      * @param res              Resolução da imagem
      * @param tamanho_ficheiro Tamanho do ficheiro de gravação
      */
-    protected SmartCamera(String id, Estado estado, double preco_instalacao, int res, double tamanho_ficheiro) {
-        super(id, estado, preco_instalacao);
-        this.resolucao = res;
+    public
+    SmartCamera ( String id , Estado estado , double preco_instalacao , int res , double tamanho_ficheiro ) {
+        super ( id , estado , preco_instalacao );
+        this.resolucao        = res;
         this.tamanho_ficheiro = tamanho_ficheiro;
     }
 
@@ -39,30 +43,36 @@ public class SmartCamera extends SmartDevice implements Serializable {
      *
      * @param cam Camera a copiar
      */
-    protected SmartCamera(SmartCamera cam) {
-        this(cam.getIdFabricante(), cam.getEstado(), cam.getPrecoInstalacao(), cam.resolucao, cam.tamanho_ficheiro);
+    public
+    SmartCamera ( SmartCamera cam ) {
+        this ( cam.getIdFabricante ( ) , cam.getEstado ( ) , cam.getPrecoInstalacao ( ) , cam.resolucao , cam.tamanho_ficheiro );
     }
 
-    //Métodos de instância
 
-    //Getters
+
+    /**
+     * Transforma uma String formatada numa SmartCamera.
+     *
+     * @param tokens String.
+     * @return SmartCamera.
+     */
+    public static
+    SmartCamera parse ( String[] tokens ) throws EstadoInvalidoException {
+        return new SmartCamera ( tokens[ 0 ] ,
+                                 SmartDevice.parseEstado ( tokens[ 1 ] ) ,
+                                 Double.parseDouble ( tokens[ 2 ] ) ,
+                                 Integer.parseInt ( tokens[ 3 ] ) ,
+                                 Double.parseDouble ( tokens[ 4 ] ) );
+    }
 
     /**
      * Devolve a resolução de imagem.
      *
      * @return double Resolução.
      */
-    public int getResolucao() {
+    public
+    int getResolucao ( ) {
         return this.resolucao;
-    }
-
-    /**
-     * Devolve o tamanho do ficheiro de gravação.
-     *
-     * @return double Tamanho do ficheiro.
-     */
-    public double getTamanhoFicheiro() {
-        return this.tamanho_ficheiro;
     }
 
     //Setters
@@ -72,8 +82,19 @@ public class SmartCamera extends SmartDevice implements Serializable {
      *
      * @param res resolução de imagem.
      */
-    public void setResolucao(int res) {
+    public
+    void setResolucao ( int res ) {
         this.resolucao = res;
+    }
+
+    /**
+     * Devolve o tamanho do ficheiro de gravação.
+     *
+     * @return double Tamanho do ficheiro.
+     */
+    public
+    double getTamanhoFicheiro ( ) {
+        return this.tamanho_ficheiro;
     }
 
     /**
@@ -81,7 +102,8 @@ public class SmartCamera extends SmartDevice implements Serializable {
      *
      * @param tamanho_ficheiro tamanho do ficheiro.
      */
-    public void setTamanhoFicheiro(Double tamanho_ficheiro) {
+    public
+    void setTamanhoFicheiro ( Double tamanho_ficheiro ) {
         this.tamanho_ficheiro = tamanho_ficheiro;
     }
 
@@ -91,26 +113,13 @@ public class SmartCamera extends SmartDevice implements Serializable {
      * @return double Consumo de energia em watts
      */
     @Override
-    public double getConsumoEnergia() {
+    public
+    double getConsumoEnergia ( ) {
         double consumo = 0.0;
-        if (this.getEstado() == Estado.LIGADO) {
-            consumo = this.tamanho_ficheiro * this.resolucao;
+        if ( this.getEstado ( ) == Estado.LIGADO ) {
+            consumo = this.tamanho_ficheiro * this.resolucao * 0.001;
         }
         return consumo;
-    }
-
-    /**
-     * Transforma uma String formatada numa SmartCamera.
-     *
-     * @param tokens String.
-     * @return SmartCamera.
-     */
-    public static SmartCamera parse(String[] tokens) throws EstadoInvalidoException {
-        return new SmartCamera(tokens[0],
-                SmartDevice.parseEstado(tokens[1]),
-                Double.parseDouble(tokens[2]),
-                Integer.parseInt(tokens[3]),
-                Double.parseDouble(tokens[4]));
     }
 
     /**
@@ -119,8 +128,9 @@ public class SmartCamera extends SmartDevice implements Serializable {
      * @return Cópia da camera.
      */
     @Override
-    public SmartCamera clone() {
-        return new SmartCamera(this);
+    public
+    SmartCamera clone ( ) {
+        return new SmartCamera ( this );
     }
 
     /**
@@ -130,14 +140,15 @@ public class SmartCamera extends SmartDevice implements Serializable {
      * @return true , false
      */
     @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof SmartCamera cam)) return false;
-        return this.getIdFabricante().equals(cam.getIdFabricante()) &&
-                Objects.equals(this.getEstado(), cam.getEstado()) &&
-                Double.compare(this.getPrecoInstalacao(), cam.getPrecoInstalacao()) == 0 &&
-                Objects.equals(this.resolucao, cam.resolucao) &&
-                Double.compare(this.tamanho_ficheiro, cam.tamanho_ficheiro) == 0;
+    public
+    boolean equals ( Object o ) {
+        if ( this == o ) return true;
+        if ( ! ( o instanceof SmartCamera cam ) ) return false;
+        return this.getIdFabricante ( ).equals ( cam.getIdFabricante ( ) ) &&
+                Objects.equals ( this.getEstado ( ) , cam.getEstado ( ) ) &&
+                Double.compare ( this.getPrecoInstalacao ( ) , cam.getPrecoInstalacao ( ) ) == 0 &&
+                Objects.equals ( this.resolucao , cam.resolucao ) &&
+                Double.compare ( this.tamanho_ficheiro , cam.tamanho_ficheiro ) == 0;
     }
 
     /**
@@ -146,13 +157,15 @@ public class SmartCamera extends SmartDevice implements Serializable {
      * @return String
      */
     @Override
-    public String toString() {
-        return "SmartCamera{" + "ID=" + this.getIdFabricante() +
-                ", estado=" + this.getEstado().toString() +
-                ", preco_instalacao=" + this.getPrecoInstalacao() +
-                ", resolucao=" + this.resolucao +
-                ", tamanho_ficheiro=" + this.tamanho_ficheiro +
-                "}";
+    public
+    String toString ( ) {
+        return new StringJoiner ( ", " , SmartCamera.class.getSimpleName ( ) + "[" , "]" )
+                .add ( "ID='" + this.getIdFabricante ( ) + "'" )
+                .add ( "estado=" + this.getEstado ( ).toString ( ) )
+                .add ( "preco_instalacao=" + getPrecoInstalacao ( ) )
+                .add ( "resolucao=" + resolucao )
+                .add ( "tamanho_ficheiro=" + tamanho_ficheiro )
+                .toString ( );
     }
 
     /**
@@ -161,7 +174,8 @@ public class SmartCamera extends SmartDevice implements Serializable {
      * @return int HashCode
      */
     @Override
-    public int hashCode() {
-        return Objects.hash(this.getIdFabricante());
+    public
+    int hashCode ( ) {
+        return Objects.hash ( this.getIdFabricante ( ) );
     }
 }

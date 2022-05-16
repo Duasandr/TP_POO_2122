@@ -4,9 +4,8 @@ import com.grupo.house.Casa;
 
 import java.io.Serializable;
 import java.time.LocalDateTime;
-import java.time.temporal.ChronoUnit;
-import java.util.Comparator;
 import java.util.Objects;
+import java.util.StringJoiner;
 
 public class Fatura implements Serializable {
     //Variáveis de instância
@@ -55,7 +54,7 @@ public class Fatura implements Serializable {
      */
     public Fatura(Casa casa , FornecedorEnergia fornecedor ,LocalDateTime inicio , LocalDateTime fim){
         this(casa.getMorada(), fornecedor.getNome(), fornecedor.calculaValorPagar(casa), casa.getConsumoEnergia(), inicio,fim);
-        casa.guardaFatura(this.id);
+        casa.setUltimaFatura ( this.id);
         fornecedor.atualizaFaturacao(this.total_a_pagar);
     }
 
@@ -100,26 +99,24 @@ public class Fatura implements Serializable {
         return this.fim;
     }
 
-    public static Fatura emiteFatura(Casa casa,FornecedorEnergia fornecedor,LocalDateTime inicio , LocalDateTime fim){
-        Fatura fatura = new Fatura(casa,fornecedor,inicio,fim);
-
-        return fatura;
-    }
-
     /**
      *
      * @param o
      * @return
      */
     @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        Fatura fatura = (Fatura) o;
-        return this.id == fatura.id &&
-                Double.compare(fatura.total_a_pagar, total_a_pagar) == 0 &&
-                Objects.equals(morada, fatura.morada) &&
-                Objects.equals(fornecedor, fatura.fornecedor);
+    public
+    boolean equals ( Object o ) {
+        if ( this == o ) return true;
+        if ( o == null || getClass ( ) != o.getClass ( ) ) return false;
+        Fatura fatura = ( Fatura ) o;
+        return id == fatura.id &&
+                Double.compare ( fatura.total_a_pagar , total_a_pagar ) == 0 &&
+                Double.compare ( fatura.total_consumo , total_consumo ) == 0 &&
+                Objects.equals ( morada , fatura.morada ) &&
+                Objects.equals ( fornecedor , fatura.fornecedor ) &&
+                Objects.equals ( inicio , fatura.inicio ) &&
+                Objects.equals ( fim , fatura.fim );
     }
 
     /**
@@ -128,7 +125,7 @@ public class Fatura implements Serializable {
      */
     @Override
     public int hashCode() {
-        return Objects.hash(id, morada, fornecedor, total_a_pagar);
+        return Objects.hash(id);
     }
 
     /**
@@ -145,15 +142,16 @@ public class Fatura implements Serializable {
      * @return
      */
     @Override
-    public String toString() {
-        final StringBuilder sb = new StringBuilder("Fatura{");
-        sb.append("id=").append(id);
-        sb.append(", morada='").append(morada).append('\'');
-        sb.append(", fornecedor='").append(fornecedor).append('\'');
-        sb.append(", total_a_pagar=").append(total_a_pagar);
-        sb.append(", inicio=").append(inicio);
-        sb.append(", fim=").append(fim);
-        sb.append('}');
-        return sb.toString();
+    public
+    String toString ( ) {
+        return new StringJoiner ( ", " , Fatura.class.getSimpleName ( ) + "[" , "]" )
+                .add ( "id=" + id )
+                .add ( "morada='" + morada + "'" )
+                .add ( "fornecedor='" + fornecedor + "'" )
+                .add ( "total_a_pagar=" + total_a_pagar )
+                .add ( "total_consumo=" + total_consumo )
+                .add ( "inicio=" + inicio )
+                .add ( "fim=" + fim )
+                .toString ( );
     }
 }

@@ -1,6 +1,6 @@
    <<<Sir Manuel>>>
 -------------------------------------------------
-| ld                          : Carregar dados (ficheiro binário)
+| ld -bin                     : Carregar dados (ficheiro binário)
 | ld -txt                     : Carregar dados (ficheiros de texto)
 | ld -rand                    : Carregar com dados aleatórios
 | mod -allon                  : Ligar todos os dispositivos

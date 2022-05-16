@@ -10,24 +10,17 @@ import java.util.Locale;
 /**
  * Classe SmartDevice
  */
-public abstract class SmartDevice implements Serializable {
-    //Variáveis de instância
+public abstract
+class SmartDevice implements Serializable {
     private String id;
     private Estado estado;
     private double preco_instalacao;
 
-    //Variáveis de classe
-    public enum Estado {
-        DESLIGADO,
-        LIGADO
-    }
-
-    //Construtores
-
     /**
      * Construtor vazio
      */
-    public SmartDevice() {
+    public
+    SmartDevice ( ) {
     }
 
     /**
@@ -37,23 +30,64 @@ public abstract class SmartDevice implements Serializable {
      * @param estado Estado atual do aparelho (ligado — desligado)
      * @param preco  Preço de instalação definido pelo fabricante.
      */
-    public SmartDevice(String id, Estado estado, double preco) {
-        this.id = id;
-        this.estado = estado;
+    public
+    SmartDevice ( String id , Estado estado , double preco ) {
+        this.id               = id;
+        this.estado           = estado;
         this.preco_instalacao = preco;
     }
 
-    //Métodos de instância
+    /**
+     * Faz o parse de uma 'string' para o estado do aparelho.
+     *
+     * @param str Estado em forma de texto
+     * @return Estado
+     */
+    public static
+    Estado parseEstado ( String str ) throws EstadoInvalidoException {
+        return switch ( str.toUpperCase ( Locale.ROOT ) ) {
+            case "LIGADO" -> Estado.LIGADO;
+            case "DESLIGADO" -> Estado.DESLIGADO;
+            default -> throw new EstadoInvalidoException ( str );
+        };
+    }
 
-    //Getters
+    /**
+     * Faz o parse de uma lista de tokens para um SmartDevice.
+     *
+     * @param tokens Parâmetros do objeto.
+     * @return Uma nova instância do objeto.
+     * @throws SmartDeviceInvalidoException Acontece quando não é reconhecido o tipo do dispositivo.
+     * @throws TonalidadeInvalidaException Acontece quando não é reconhecida uma tonalidade.
+     */
+    public static
+    SmartDevice parse ( String[] tokens ) throws SmartDeviceInvalidoException, TonalidadeInvalidaException, EstadoInvalidoException {
+        return switch ( tokens[ 0 ] ) {
+            case "Bulb" -> SmartBulb.parse ( tokens[ 1 ].split ( ";" ) );
+            case "Speaker" -> SmartSpeaker.parse ( tokens[ 1 ].split ( ";" ) );
+            case "Camera" -> SmartCamera.parse ( tokens[ 1 ].split ( ";" ) );
+            default -> throw new SmartDeviceInvalidoException ( tokens[ 0 ] );
+        };
+    }
 
     /**
      * Devolve o identificador do aparelho emitido pelo fabricante.
      *
      * @return String Identificador.
      */
-    public String getIdFabricante() {
+    public
+    String getIdFabricante ( ) {
         return this.id;
+    }
+
+    /**
+     * Define o identificador do aparelho.
+     *
+     * @param id Identificador
+     */
+    public
+    void setIdFabricante ( String id ) {
+        this.id = id;
     }
 
     /**
@@ -61,35 +95,9 @@ public abstract class SmartDevice implements Serializable {
      *
      * @return Estado do aparelho (ligado — desligado)
      */
-    public Estado getEstado() {
+    public
+    Estado getEstado ( ) {
         return this.estado;
-    }
-
-    /**
-     * Devolve o preço de intalação definido pelo fabricante.
-     *
-     * @return Preço de instalação.
-     */
-    public double getPrecoInstalacao() {
-        return this.preco_instalacao;
-    }
-
-    /**
-     * Devolve o consumo de energia que do aparelho.
-     *
-     * @return Energia consumida pelo aparelho.
-     */
-    public abstract double getConsumoEnergia();
-
-    //Setters
-
-    /**
-     * Define o identificador do aparelho.
-     *
-     * @param id Identificador
-     */
-    public void setIdFabricante(String id) {
-        this.id = id;
     }
 
     /**
@@ -97,10 +105,21 @@ public abstract class SmartDevice implements Serializable {
      *
      * @param estado Estado do aparelho (ligado — desligado).
      */
-    public void setEstado(Estado estado) {
-        if (estado != null) {
+    public
+    void setEstado ( Estado estado ) {
+        if ( estado != null ) {
             this.estado = estado;
         }
+    }
+
+    /**
+     * Devolve o preço de intalação definido pelo fabricante.
+     *
+     * @return Preço de instalação.
+     */
+    public
+    double getPrecoInstalacao ( ) {
+        return this.preco_instalacao;
     }
 
     /**
@@ -108,42 +127,18 @@ public abstract class SmartDevice implements Serializable {
      *
      * @param preco Preço de instalação.
      */
-    public void setPrecoInstalacao(double preco) {
+    public
+    void setPrecoInstalacao ( double preco ) {
         this.preco_instalacao = preco;
     }
 
-    //Métodos de parsing
-
     /**
-     * Faz o parse de uma 'string' para o estado do aparelho.
-     * @param str Estado em forma de texto
-     * @return Estado
+     * Devolve o consumo de energia que do aparelho.
+     *
+     * @return Energia consumida pelo aparelho.
      */
-    public static Estado parseEstado(String str) throws EstadoInvalidoException {
-        return switch (str.toUpperCase(Locale.ROOT)){
-            case "LIGADO"-> Estado.LIGADO;
-            case "DESLIGADO"-> Estado.DESLIGADO;
-            default -> throw new EstadoInvalidoException(str);
-        };
-    }
-
-    /**
-     * Faz o parse de uma lista de tokens para um SmartDevice.
-     * @param tokens Parâmetros do objeto.
-     * @return Uma nova instância do objeto.
-     * @throws SmartDeviceInvalidoException Acontece quando não é reconhecido o tipo do dispositivo.
-     * @throws TonalidadeInvalidaException Acontece quando não é reconhecida uma tonalidade.
-     */
-    public static SmartDevice parse(String[] tokens) throws SmartDeviceInvalidoException, TonalidadeInvalidaException, EstadoInvalidoException {
-        return switch (tokens[0]) {
-            case "Bulb" -> SmartBulb.parse(tokens[1].split(";"));
-            case "Speaker" -> SmartSpeaker.parse(tokens[1].split(";"));
-            case "Camera" -> SmartCamera.parse(tokens[1].split(";"));
-            default -> throw new SmartDeviceInvalidoException(tokens[0]);
-        };
-    }
-
-    //Métodos de Object
+    public abstract
+    double getConsumoEnergia ( );
 
     /**
      * Clona o aparelho.
@@ -151,7 +146,10 @@ public abstract class SmartDevice implements Serializable {
      * @return Aparelho clonado.
      */
     @Override
-    public abstract SmartDevice clone();
+    public abstract
+    SmartDevice clone ( );
+
+    //Métodos de Object
 
     /**
      * Verifica se dois objetos são iguais.
@@ -160,7 +158,8 @@ public abstract class SmartDevice implements Serializable {
      * @return Verdadeiro ou falso.
      */
     @Override
-    public abstract boolean equals(Object o);
+    public abstract
+    boolean equals ( Object o );
 
     /**
      * Cria um indice através de uma função de hash.
@@ -168,5 +167,14 @@ public abstract class SmartDevice implements Serializable {
      * @return Indice
      */
     @Override
-    public abstract int hashCode();
+    public abstract
+    int hashCode ( );
+
+    /**
+     * Estados possíveis que um dispositivo pode ter.
+     */
+    public
+    enum Estado {
+        DESLIGADO, LIGADO
+    }
 }

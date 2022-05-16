@@ -10,6 +10,7 @@ import com.grupo.power.FornecedorEnergia;
 import java.io.*;
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.function.Consumer;
 
 public class Modelo implements Serializable{
     // Variáveis de instância
@@ -188,22 +189,22 @@ public class Modelo implements Serializable{
 
     /**
      * Altera o estado de todos os aparelhos de todas as casas.
-     * @param novo_estado Novo estado.
+     * @param acao Ação a executar.
      */
-    public void alteraEstado(SmartDevice.Estado novo_estado){
+    public void foreachDispositivo ( Consumer<SmartDevice> acao ){
         for (Casa casa : this.casas.values()) {
-            casa.alteraEstado(novo_estado);
+            casa.foreachDispositivo ( acao );
         }
     }
 
     /**
      * Altera o estado de todos os dispositivos de uma casa.
      * @param morada Morada da casa.
-     * @param novo_estado Novo estado.
+     * @param acao Acao a executar.
      */
-    public void alteraEstado(String morada , SmartDevice.Estado novo_estado) throws CasaInexistenteException {
+    public void foreachDispositivo ( String morada , Consumer<SmartDevice> acao) throws CasaInexistenteException {
         if(this.casas.containsKey(morada)){
-            this.casas.get(morada).alteraEstado(novo_estado);
+            this.casas.get(morada).foreachDispositivo ( acao );
         }else{
             throw new CasaInexistenteException();
         }
@@ -213,13 +214,13 @@ public class Modelo implements Serializable{
      * Altera o estado de todos os dispositivos de uma divisão.
      * @param morada Morada da casa.
      * @param divisao Nome da divisão.
-     * @param novo_estado Novo estado.
+     * @param acao Ação a executar.
      * @throws CasaInexistenteException Quando não existe a casa.
      * @throws DivisaoNaoExisteException Quando não existe a divisão.
      */
-    public void alteraEstado(String morada , String divisao , SmartDevice.Estado novo_estado) throws CasaInexistenteException, DivisaoNaoExisteException {
+    public void foreachDispositivoDivisao ( String morada , String divisao , Consumer<SmartDevice> acao) throws CasaInexistenteException, DivisaoNaoExisteException {
         if(this.casas.containsKey(morada)){
-            this.casas.get(morada).alteraEstadoDivisao(divisao,novo_estado);
+            this.casas.get(morada).foreachDispositivoDivisao(divisao,acao);
         }else{
             throw new CasaInexistenteException();
         }
@@ -239,7 +240,7 @@ public class Modelo implements Serializable{
         return new AbstractMap.SimpleEntry<String,SmartDevice>(local,dev);
     }
 
-    public void adicionaDispositivo(String casa , String divisao , SmartDevice device) throws DispositivoNaoExisteException {
+    public void adicionaDispositivo(String casa , String divisao , SmartDevice device) throws DivisaoNaoExisteException {
         if (this.casas.containsKey(casa)){
             this.casas.get(casa).adicionaDispositivo(divisao,device);
         }

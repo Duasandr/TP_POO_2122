@@ -1,6 +1,7 @@
 package com.grupo.controlador;
 
-import com.grupo.comparators.FornecedorPorFaturacao;
+import com.grupo.consumer.DesligaDispositivo;
+import com.grupo.consumer.LigaDispositivo;
 import com.grupo.device.SmartBulb;
 import com.grupo.device.SmartCamera;
 import com.grupo.device.SmartDevice;
@@ -147,10 +148,10 @@ class Controlador {
     void modifyHandler ( String[] args ) throws OpcaoInvalidaException, CasaInexistenteException, DivisaoNaoExisteException {
         if (args.length > 1) {
             switch (args[ 1 ]) {
-                case "-allon" -> this.modelo.alteraEstado ( SmartDevice.Estado.LIGADO );
-                case "-allof" -> this.modelo.alteraEstado ( SmartDevice.Estado.DESLIGADO );
-                case "-divon" -> this.modelo.alteraEstado ( args[ 2 ], args[ 3 ], SmartDevice.Estado.LIGADO );
-                case "-divof" -> this.modelo.alteraEstado ( args[ 2 ], args[ 3 ], SmartDevice.Estado.DESLIGADO );
+                case "-allon" -> this.modelo.foreachDispositivo ( new LigaDispositivo () );
+                case "-allof" -> this.modelo.foreachDispositivo ( new DesligaDispositivo () );
+                case "-divon" -> this.modelo.foreachDispositivoDivisao ( args[ 2 ], args[ 3 ], new LigaDispositivo () );
+                case "-divof" -> this.modelo.foreachDispositivoDivisao ( args[ 2 ], args[ 3 ], new DesligaDispositivo () );
                 case "-h" -> statusCasas ( );
                 default -> throw new OpcaoInvalidaException ( args[ 0 ] );
             }
@@ -305,11 +306,11 @@ class Controlador {
     String casaComMaiorDespesa ( ) {
         Iterator<Casa> casas       = this.modelo.getCasa ( );
         Casa           mvp         = casas.next ( );
-        double         max_despesa = this.modelo.getFatura ( mvp.ultimaFatura ( ) ).getTotalAPagar ( );
+        double         max_despesa = this.modelo.getFatura ( mvp.getUltimaFatura ( ) ).getTotalAPagar ( );
 
         while (casas.hasNext ( )) {
             Casa   casa    = casas.next ( );
-            Fatura fatura  = this.modelo.getFatura ( casa.ultimaFatura ( ) );
+            Fatura fatura  = this.modelo.getFatura ( casa.getUltimaFatura ( ) );
             double despesa = fatura.getTotalAPagar ( );
 
             if (despesa > max_despesa) {
