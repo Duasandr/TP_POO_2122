@@ -34,6 +34,17 @@ class Divisao implements Serializable {
     }
 
     /**
+     * Construtor por parâmetros.
+     *
+     * @param nome Nome da divisão.
+     */
+    public
+    Divisao ( String nome ) {
+        this ( );
+        this.nome = nome;
+    }
+
+    /**
      * Construtor por cópia.
      *
      * @param divisao Divisão a copiar.
@@ -52,18 +63,21 @@ class Divisao implements Serializable {
      */
     public static
     Divisao parse ( String str ) throws LinhaFormatadaInvalidaException, SmartDeviceInvalidoException, TonalidadeInvalidaException, EstadoInvalidoException {
-        String[] tokens           = str.split ( "\\[" );
-        String[] str_dispositivos = tokens[ 1 ].split ( " " );
-        Divisao  divisao          = new Divisao ( );
+        String[] tokens  = str.split ( "\\[" );
+        Divisao  divisao = new Divisao ( );
 
-        if ( tokens.length == 2 ) {
-            Set < SmartDevice > dispositivos = new HashSet <> ( str_dispositivos.length );
-
-            for (String disp : str_dispositivos) {
-                dispositivos.add ( SmartDevice.parse ( disp.split ( " " ) ) );
-            }
-
+        if ( tokens.length >= 1 ) {
             divisao.setNome ( tokens[ 0 ] );
+            Set < SmartDevice > dispositivos = new HashSet <> ( );
+
+            if ( tokens.length == 2 ) {
+                String[] str_dispositivos = tokens[ 1 ].split ( " " );
+                if ( tokens[ 1 ].length ( ) > 1 ) {
+                    for (String disp : str_dispositivos) {
+                        dispositivos.add ( SmartDevice.parse ( disp.split ( ":" ) ) );
+                    }
+                }
+            }
             divisao.setDevices ( dispositivos );
         }
         else {

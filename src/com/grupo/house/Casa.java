@@ -42,6 +42,15 @@ class Casa implements Serializable {
         this.setDivisoes ( divisoes );
     }
 
+    public
+    Casa (String morada,String proprietario , int nif , String fornecedor ){
+        this();
+        this.morada = morada;
+        this.proprietario = proprietario;
+        this.nif_proprietario = nif;
+        this.fornecedor = fornecedor;
+    }
+
     /**
      * Construtor por cópia.
      *
@@ -66,10 +75,9 @@ class Casa implements Serializable {
     Casa parse ( String str ) throws LinhaFormatadaInvalidaException, SmartDeviceInvalidoException, TonalidadeInvalidaException, EstadoInvalidoException {
         String[] tokens          = str.split ( "\\{" );
         String[] tokens_casa     = tokens[ 0 ].split ( ";" );
-        String[] tokens_divisoes = tokens[ 1 ].split ( "\\|" );
         Casa     casa            = new Casa ( );
 
-        if ( tokens.length == 4 ) {
+        if ( tokens_casa.length == 4 ) {
             casa.morada           = tokens_casa[ 0 ];
             casa.proprietario     = tokens_casa[ 1 ];
             casa.fornecedor       = tokens_casa[ 2 ];
@@ -77,8 +85,11 @@ class Casa implements Serializable {
 
             Set < Divisao > divisoes = new HashSet <> ( );
 
-            for (String divisao : tokens_divisoes) {
-                divisoes.add ( Divisao.parse ( divisao ) );
+            if ( tokens.length == 2 ) {
+                String[] tokens_divisoes = tokens[ 1 ].split ( "\\|" );
+                for (String divisao : tokens_divisoes) {
+                    divisoes.add ( Divisao.parse ( divisao ) );
+                }
             }
 
             casa.setDivisoes ( divisoes );
@@ -272,7 +283,7 @@ class Casa implements Serializable {
     }
 
     /**
-     * Altera todos os estados de todos os dispositivos da divisão.
+     * Altera todos os estados de todos os dispositivos da Casa.
      *
      * @param acao Acao a executar
      */
@@ -284,12 +295,12 @@ class Casa implements Serializable {
     }
 
     /**
-     * Altera todos os estados de todos os dispositivos da divisão.
+     * Altera todos os estados de todos os dispositivos de uma Divisao.
      *
      * @param acao Açaõ a executar.
      */
     public
-    void foreachDispositivoDivisao ( String divisao , Consumer < SmartDevice > acao ) throws DivisaoNaoExisteException {
+    void foreachDispositivo ( String divisao , Consumer < SmartDevice > acao ) throws DivisaoNaoExisteException {
         if ( this.divisoes.containsKey ( divisao ) ) {
             this.divisoes.get ( divisao ).foreachDispositivo ( acao );
         }
@@ -305,10 +316,10 @@ class Casa implements Serializable {
      * @param divisao        String
      * @return SmartDevice removido
      * @throws DispositivoNaoExisteException Quando não existe
-     * @throws DivisaoNaoExisteException Quando não existe
+     * @throws DivisaoNaoExisteException     Quando não existe
      */
     public
-    SmartDevice removeDispositivo ( String id_dispositivo , String divisao ) throws DispositivoNaoExisteException, DivisaoNaoExisteException {
+    SmartDevice remove ( String id_dispositivo , String divisao ) throws DispositivoNaoExisteException, DivisaoNaoExisteException {
         SmartDevice dev;
         if ( this.divisoes.containsKey ( divisao ) ) {
             dev = this.divisoes.get ( divisao ).removeDispositivo ( id_dispositivo );
@@ -320,19 +331,49 @@ class Casa implements Serializable {
     }
 
     /**
+     * Remove uma divisão da casa.
+     * @param nome_div String
+     * @return Divisao
+     * @throws DivisaoNaoExisteException Quando a divisão não existe
+     */
+    public
+    Divisao remove ( String nome_div ) throws DivisaoNaoExisteException {
+        Divisao div;
+        if ( this.divisoes.containsKey ( nome_div ) ) {
+            div = this.divisoes.get ( nome_div );
+        }
+        else {
+            throw new DivisaoNaoExisteException ( nome_div );
+        }
+
+        return div;
+    }
+
+    /**
      * Adiciona um SmartDevice a uma Divisao.
-     * @param div Divisao
+     *
+     * @param div    Divisao
      * @param device SmartDevice
      * @throws DivisaoNaoExisteException Quando uma Divisao não existe.
      */
     public
-    void adicionaDispositivo ( String div , SmartDevice device ) throws DivisaoNaoExisteException {
+    void adiciona ( String div , SmartDevice device ) throws DivisaoNaoExisteException {
         if ( this.divisoes.containsKey ( div ) ) {
             this.divisoes.get ( div ).adicionaDispositivo ( device );
         }
         else {
             throw new DivisaoNaoExisteException ( div );
         }
+    }
+
+    /**
+     * Adiciona uma Divisao a uma Casa.
+     *
+     * @param div Divisao
+     */
+    public
+    void adiciona ( Divisao div ) {
+        this.divisoes.put ( div.getNome ( ) , div.clone ( ) );
     }
 
     /**

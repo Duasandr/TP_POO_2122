@@ -8,8 +8,7 @@ import com.grupo.view.View;
 
 public class Main {
     public static void main(String[] args) {
-        Modelo modelo = new Modelo();
-        Controlador controlador = new Controlador(modelo);
+        Controlador controlador = new Controlador(new Modelo ());
         if(args.length > 0){
             try{
                 View view = new AutoView ( controlador, args[0] );

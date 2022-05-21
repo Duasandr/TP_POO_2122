@@ -9,6 +9,7 @@ import com.grupo.device.SmartSpeaker;
 import com.grupo.exceptions.*;
 import com.grupo.generator.GeradorAleatorio;
 import com.grupo.house.Casa;
+import com.grupo.house.Divisao;
 import com.grupo.model.Modelo;
 import com.grupo.power.Fatura;
 import com.grupo.power.FornecedorEnergia;
@@ -20,14 +21,12 @@ import java.nio.file.Paths;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.AbstractMap;
-import java.util.Iterator;
-import java.util.List;
+import java.time.temporal.ChronoUnit;
+import java.util.*;
 
 public
 class Controlador {
     private Modelo modelo;
-    private long   dias;
 
     public
     Controlador ( Modelo modelo ) {
@@ -35,8 +34,17 @@ class Controlador {
     }
 
     private static
-    List<String> lerFicheiro ( String path ) throws IOException {
-        return Files.readAllLines ( Paths.get ( path ), StandardCharsets.UTF_8 );
+    List < String > lerFicheiro ( String path ) throws IOException {
+        return Files.readAllLines ( Paths.get ( path ) , StandardCharsets.UTF_8 );
+    }
+
+    private static
+    Modelo carregaEstado ( String path ) throws IOException, ClassNotFoundException {
+        FileInputStream   fis = new FileInputStream ( path );
+        ObjectInputStream ois = new ObjectInputStream ( fis );
+        Modelo            s   = ( Modelo ) ois.readObject ( );
+        ois.close ( );
+        return s;
     }
 
     private
@@ -58,52 +66,32 @@ class Controlador {
         oos.close ( );
     }
 
-    private static
-    Modelo carregaEstado ( String path ) throws IOException, ClassNotFoundException {
-        FileInputStream   fis = new FileInputStream ( path );
-        ObjectInputStream ois = new ObjectInputStream ( fis );
-        Modelo            s   = (Modelo) ois.readObject ( );
-        ois.close ( );
-        return s;
+    private
+    void carregaFicheiroBinario ( String path ) throws IOException, ClassNotFoundException {
+        this.modelo = carregaEstado ( path );
     }
 
     private
-    void carregaFicheiroBinario ( ) throws IOException, ClassNotFoundException {
-        this.modelo = carregaEstado ( "./bin/estado" );
-    }
-
-    private
-    void carregaDadosFicheiroTexto ( ) throws IOException, LinhaFormatadaInvalidaException, SmartDeviceInvalidoException, TonalidadeInvalidaException, EstadoInvalidoException {
-        carregaFornecedores ( "./in/fornecedores" );
-        carregaCasas ( "./in/casas" );
+    void carregaDadosFicheiroTexto ( String[] paths ) throws IOException, LinhaFormatadaInvalidaException, SmartDeviceInvalidoException, TonalidadeInvalidaException, EstadoInvalidoException {
+        carregaFornecedores ( paths[ 2 ] );
+        carregaCasas ( paths[ 3 ] );
+        this.modelo.verificaContrato ( );
     }
 
     private
     void geraDadosAleatorios ( GeradorAleatorio gerador ) {
         this.modelo.setFornecedores ( gerador.getFornecedores ( ) );
         this.modelo.setCasas ( gerador.getCasas ( ) );
+        this.modelo.verificaContrato ( );
     }
 
 
     public
-    String statusFornecedores ( ) {
-        StringBuilder               sb           = new StringBuilder ( );
-        Iterator<FornecedorEnergia> fornecedores = this.modelo.getFornecedor ( );
-        sb.append ( "Fornecedores: {\n" );
-        while (fornecedores.hasNext ( )) {
-            sb.append ( "\t" ).append ( fornecedores.next ( ).toString ( ) ).append ( "\n" );
-        }
-        sb.append ( "}\n" );
-        return sb.toString ( );
-    }
-
-    public
-    String statusCasas ( ) {
-        StringBuilder  sb    = new StringBuilder ( );
-        Iterator<Casa> casas = this.modelo.getCasa ( );
-        sb.append ( "Casas: {\n" );
-        while (casas.hasNext ( )) {
-            sb.append ( "\t" ).append ( casas.next ( ).toString ( ) ).append ( "\n" );
+    String status ( String nome , Iterator < ? > list ) {
+        StringBuilder sb = new StringBuilder ( );
+        sb.append ( nome ).append ( ':' ).append ( '\n' );
+        while ( list.hasNext ( ) ) {
+            sb.append ( "\t" ).append ( list.next ( ).toString ( ) ).append ( "\n" );
         }
         sb.append ( "}\n" );
         return sb.toString ( );
@@ -111,63 +99,85 @@ class Controlador {
 
     private
     String status ( ) {
-        return statusFornecedores ( ) + statusCasas ( );
+        return status ( "Fornecedores" , this.modelo.getFornecedor ( ) ) +
+                status ( "Casas" , this.modelo.getCasa ( ) ) +
+                status ( "Faturas" , this.modelo.getFatura ( ) ) +
+                LocalDateTime.now ( ).plusDays ( this.modelo.getDias ( ) );
+    }
+
+    public
+    void addHandler ( String[] args ) throws OpcaoInvalidaException, CasaInexistenteException, SmartDeviceInvalidoException, LinhaFormatadaInvalidaException, TonalidadeInvalidaException, EstadoInvalidoException, DivisaoNaoExisteException {
+        if ( args.length > 1 ) {
+            switch ( args[ 1 ] ) {
+                case "-h" -> {
+                    this.modelo.adiciona ( Casa.parse ( args[ 2 ] ) );
+                    this.modelo.verificaContrato ( );
+                }
+                case "-f" -> this.modelo.adiciona ( FornecedorEnergia.parse ( args[2] ) );
+                case "-div" -> this.modelo.adiciona ( args[ 2 ] , Divisao.parse ( args[ 3 ] ) );
+                case "-dev" -> this.modelo.adiciona ( args[ 2 ] , args[ 3 ] , SmartDevice.parse ( args[ 4 ].split ( ":" ) ) );
+                default -> throw new OpcaoInvalidaException ( args[ 0 ] );
+            }
+        }
+        else {
+            throw new OpcaoInvalidaException ( "man para qualquer duvida" );
+        }
     }
 
     public
     void loaderHandler ( String[] args ) throws IOException, ClassNotFoundException, LinhaFormatadaInvalidaException, OpcaoInvalidaException, SmartDeviceInvalidoException, TonalidadeInvalidaException, EstadoInvalidoException {
-        if (args.length > 1) {
-            switch (args[ 1 ]) {
-                case "-bin" -> carregaFicheiroBinario ( );
-                case "-txt" -> carregaDadosFicheiroTexto ( );
+        if ( args.length > 1 ) {
+            switch ( args[ 1 ] ) {
+                case "-bin" -> carregaFicheiroBinario ( args[ 2 ] );
+                case "-txt" -> carregaDadosFicheiroTexto ( args );
                 case "-rand" -> geraDadosAleatorios ( new GeradorAleatorio ( ) );
                 default -> throw new OpcaoInvalidaException ( args[ 0 ] );
             }
         }
         else {
-            throw new OpcaoInvalidaException ( "man sim para qualquer duvida" );
+            throw new OpcaoInvalidaException ( "man para qualquer duvida" );
         }
     }
 
     public
     String statusHandler ( String[] args ) throws OpcaoInvalidaException {
-        if (args.length > 1) {
-            return switch (args[ 1 ]) {
+        if ( args.length > 1 ) {
+            return switch ( args[ 1 ] ) {
                 case "-all" -> status ( );
-                case "-f" -> statusFornecedores ( );
-                case "-h" -> statusCasas ( );
+                case "-f" -> status ( "Fornecedores" , this.modelo.getFornecedor ( ) );
+                case "-h" -> status ( "Casas" , this.modelo.getCasa ( ) );
+                case "-b" -> status ( "Faturas" , this.modelo.getFatura ( ) );
                 default -> throw new OpcaoInvalidaException ( args[ 0 ] );
             };
         }
         else {
-            throw new OpcaoInvalidaException ( "man sim para qualquer duvida" );
+            throw new OpcaoInvalidaException ( "man para qualquer duvida" );
         }
     }
 
     public
     void modifyHandler ( String[] args ) throws OpcaoInvalidaException, CasaInexistenteException, DivisaoNaoExisteException {
-        if (args.length > 1) {
-            switch (args[ 1 ]) {
-                case "-allon" -> this.modelo.foreachDispositivo ( new LigaDispositivo () );
-                case "-allof" -> this.modelo.foreachDispositivo ( new DesligaDispositivo () );
-                case "-divon" -> this.modelo.foreachDispositivoDivisao ( args[ 2 ], args[ 3 ], new LigaDispositivo () );
-                case "-divof" -> this.modelo.foreachDispositivoDivisao ( args[ 2 ], args[ 3 ], new DesligaDispositivo () );
-                case "-h" -> statusCasas ( );
+        if ( args.length > 1 ) {
+            switch ( args[ 1 ] ) {
+                case "-allon" -> this.modelo.foreachDispositivo ( new LigaDispositivo ( ) );
+                case "-allof" -> this.modelo.foreachDispositivo ( new DesligaDispositivo ( ) );
+                case "-divon" -> this.modelo.foreachDispositivo ( args[ 2 ] , args[ 3 ] , new LigaDispositivo ( ) );
+                case "-divof" -> this.modelo.foreachDispositivo ( args[ 2 ] , args[ 3 ] , new DesligaDispositivo ( ) );
                 default -> throw new OpcaoInvalidaException ( args[ 0 ] );
             }
         }
         else {
-            throw new OpcaoInvalidaException ( "man sim para qualquer duvida" );
+            throw new OpcaoInvalidaException ( "man para qualquer duvida" );
         }
     }
 
     public
     String mvpHandler ( String[] args ) throws OpcaoInvalidaException, DadosInsuficientesException {
-        if (args.length > 1) {
-            if (this.dias > 0) {
-                return switch (args[ 1 ]) {
-                    case "-h" -> casaComMaiorDespesa ( );
-                    case "-f" -> fornecedorComMaiorFaturacao ( );
+        if ( args.length > 1 ) {
+            if ( this.modelo.getDias ( ) > 0 ) {
+                return switch ( args[ 1 ] ) {
+                    case "-h" -> mvp ( this.modelo.getFatura ( ) );
+                    case "-f" -> mvpForncedor ( this.modelo.getFornecedor ( ) );
                     default -> throw new OpcaoInvalidaException ( args[ 0 ] );
                 };
             }
@@ -176,7 +186,7 @@ class Controlador {
             }
         }
         else {
-            throw new OpcaoInvalidaException ( "man sim para qualquer duvida" );
+            throw new OpcaoInvalidaException ( "man para qualquer duvida" );
         }
     }
 
@@ -187,15 +197,15 @@ class Controlador {
             switch ( args[ 1 ] ) {
                 case "-on" -> {
                     dev.getValue ( ).setEstado ( SmartDevice.Estado.LIGADO );
-                    this.modelo.adicionaDispositivo ( args[ 2 ] , dev.getKey ( ) , dev.getValue ( ) );
+                    this.modelo.adiciona ( args[ 2 ] , dev.getKey ( ) , dev.getValue ( ) );
                 }
                 case "-off" -> {
                     dev.getValue ( ).setEstado ( SmartDevice.Estado.DESLIGADO );
-                    this.modelo.adicionaDispositivo ( args[ 2 ] , dev.getKey ( ) , dev.getValue ( ) );
+                    this.modelo.adiciona ( args[ 2 ] , dev.getKey ( ) , dev.getValue ( ) );
                 }
                 case "-price" -> {
                     dev.getValue ( ).setPrecoInstalacao ( Double.parseDouble ( args[ 4 ] ) );
-                    this.modelo.adicionaDispositivo ( args[ 2 ] , dev.getKey ( ) , dev.getValue ( ) );
+                    this.modelo.adiciona ( args[ 2 ] , dev.getKey ( ) , dev.getValue ( ) );
                 }
                 case "-tone" -> {
                     if ( dev.getValue ( ) instanceof SmartBulb ) {
@@ -204,7 +214,7 @@ class Controlador {
                     else {
                         throw new NaoEBulbException ( args[ 3 ] );
                     }
-                    this.modelo.adicionaDispositivo ( args[ 2 ] , dev.getKey ( ) , dev.getValue ( ) );
+                    this.modelo.adiciona ( args[ 2 ] , dev.getKey ( ) , dev.getValue ( ) );
                 }
                 case "-dim" -> {
                     if ( dev.getValue ( ) instanceof SmartBulb ) {
@@ -213,7 +223,7 @@ class Controlador {
                     else {
                         throw new NaoEBulbException ( args[ 3 ] );
                     }
-                    this.modelo.adicionaDispositivo ( args[ 2 ] , dev.getKey ( ) , dev.getValue ( ) );
+                    this.modelo.adiciona ( args[ 2 ] , dev.getKey ( ) , dev.getValue ( ) );
                 }
                 case "-res" -> {
                     if ( dev.getValue ( ) instanceof SmartCamera ) {
@@ -222,7 +232,7 @@ class Controlador {
                     else {
                         throw new NaoECamException ( args[ 3 ] );
                     }
-                    this.modelo.adicionaDispositivo ( args[ 2 ] , dev.getKey ( ) , dev.getValue ( ) );
+                    this.modelo.adiciona ( args[ 2 ] , dev.getKey ( ) , dev.getValue ( ) );
                 }
                 case "-file" -> {
                     if ( dev.getValue ( ) instanceof SmartCamera ) {
@@ -231,7 +241,7 @@ class Controlador {
                     else {
                         throw new NaoECamException ( args[ 3 ] );
                     }
-                    this.modelo.adicionaDispositivo ( args[ 2 ] , dev.getKey ( ) , dev.getValue ( ) );
+                    this.modelo.adiciona ( args[ 2 ] , dev.getKey ( ) , dev.getValue ( ) );
                 }
                 case "-vol" -> {
                     if ( dev.getValue ( ) instanceof SmartSpeaker ) {
@@ -240,7 +250,7 @@ class Controlador {
                     else {
                         throw new NaoESpeakException ( args[ 3 ] );
                     }
-                    this.modelo.adicionaDispositivo ( args[ 2 ] , dev.getKey ( ) , dev.getValue ( ) );
+                    this.modelo.adiciona ( args[ 2 ] , dev.getKey ( ) , dev.getValue ( ) );
                 }
                 case "-max" -> {
                     if ( dev.getValue ( ) instanceof SmartSpeaker ) {
@@ -249,7 +259,7 @@ class Controlador {
                     else {
                         throw new NaoESpeakException ( args[ 3 ] );
                     }
-                    this.modelo.adicionaDispositivo ( args[ 2 ] , dev.getKey ( ) , dev.getValue ( ) );
+                    this.modelo.adiciona ( args[ 2 ] , dev.getKey ( ) , dev.getValue ( ) );
                 }
                 case "-cha" -> {
                     if ( dev.getValue ( ) instanceof SmartSpeaker ) {
@@ -258,7 +268,7 @@ class Controlador {
                     else {
                         throw new NaoESpeakException ( args[ 3 ] );
                     }
-                    this.modelo.adicionaDispositivo ( args[ 2 ] , dev.getKey ( ) , dev.getValue ( ) );
+                    this.modelo.adiciona ( args[ 2 ] , dev.getKey ( ) , dev.getValue ( ) );
                 }
                 default -> throw new OpcaoInvalidaException ( args[ 0 ] );
             }
@@ -267,34 +277,27 @@ class Controlador {
 
     public
     void avancaNoTempo ( long dias ) {
-        LocalDateTime inicio = LocalDateTime.now ( ).plusDays ( this.dias );
-        this.dias += dias;
-        LocalDateTime fim = LocalDateTime.now ( ).plusDays ( this.dias );
-        this.modelo.emiteFaturas ( inicio, fim );
+        LocalDateTime inicio = LocalDateTime.now ( ).plusDays ( this.modelo.getDias ( ) );
+        this.modelo.atualizaDias ( dias );
+        LocalDateTime fim = LocalDateTime.now ( ).plusDays ( this.modelo.getDias ( ) );
+        this.modelo.emiteFaturas ( inicio , fim );
     }
 
     private
-    String darOrdenacao ( LocalDateTime inicio, LocalDateTime fim ) {
-        StringBuilder  sb    = new StringBuilder ( );
-        Iterator<Casa> casas = this.modelo.getCasa ( inicio, fim );
-
-        while (casas.hasNext ( )) {
-            sb.append ( casas.next ( ).toString ( ) ).append ( "\n" );
-        }
-        sb.append ( "}" );
-
-        return sb.toString ( );
+    String darOrdenacao ( LocalDateTime inicio , LocalDateTime fim ) {
+        Map < Double, Set < String > > o = this.modelo.getFatura ( inicio , fim );
+        return o.values ( ).toString ( );
     }
 
     public
     String darHandler ( String[] args ) {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern ( "yyyy-MM-dd" );
-        return darOrdenacao ( LocalDateTime.from ( LocalDate.parse ( args[ 1 ], formatter ).atStartOfDay ( ) ), LocalDateTime.from ( LocalDate.parse ( args[ 2 ], formatter ).atStartOfDay ( ) ) );
+        return darOrdenacao ( LocalDateTime.from ( LocalDate.parse ( args[ 1 ] , formatter ).atStartOfDay ( ) ) , LocalDateTime.from ( LocalDate.parse ( args[ 2 ] , formatter ).atStartOfDay ( ) ) );
     }
 
     public
     String billHandler ( String[] args ) {
-        return listarFaturasFornecedor ( args[ 1 ] );
+        return bills ( args[ 1 ] , this.modelo.getFatura ( args[ 1 ] ) );
     }
 
     public
@@ -303,19 +306,20 @@ class Controlador {
     }
 
     public
-    String casaComMaiorDespesa ( ) {
-        Iterator<Casa> casas       = this.modelo.getCasa ( );
-        Casa           mvp         = casas.next ( );
-        double         max_despesa = this.modelo.getFatura ( mvp.getUltimaFatura ( ) ).getTotalAPagar ( );
+    String mvp ( Iterator < Fatura > faturas ) {
+        Fatura mvp         = faturas.next ( );
+        double max_despesa = 0.0;
 
-        while (casas.hasNext ( )) {
-            Casa   casa    = casas.next ( );
-            Fatura fatura  = this.modelo.getFatura ( casa.getUltimaFatura ( ) );
-            double despesa = fatura.getTotalAPagar ( );
+        while ( faturas.hasNext ( ) ) {
+            Fatura fatura = faturas.next ( );
 
-            if (despesa > max_despesa) {
-                max_despesa = despesa;
-                mvp         = casa;
+            if ( fatura.getData ( ).truncatedTo ( ChronoUnit.DAYS ).equals ( LocalDateTime.now ( ).plusDays ( this.modelo.getDias ( ) ).truncatedTo ( ChronoUnit.DAYS ) ) ) {
+                double despesa = fatura.getTotalAPagar ( );
+
+                if ( despesa > max_despesa ) {
+                    max_despesa = despesa;
+                    mvp         = fatura;
+                }
             }
         }
 
@@ -323,30 +327,28 @@ class Controlador {
     }
 
     public
-    String fornecedorComMaiorFaturacao ( ) {
-        Iterator<FornecedorEnergia> fornecedores       = this.modelo.getFornecedor ( );
-        FornecedorEnergia           mvp         = fornecedores.next ( );
-        double         max_despesa =  mvp.getFaturacao ();
+    String mvpForncedor ( Iterator < FornecedorEnergia > fornecedores ) {
+        FornecedorEnergia mvp         = fornecedores.next ( );
+        double            max_despesa = mvp.getFaturacao ( );
 
-        while (fornecedores.hasNext ( )) {
-            FornecedorEnergia   fornecedor    = fornecedores.next ( );
-            double despesa = fornecedor.getFaturacao ( );
+        while ( fornecedores.hasNext ( ) ) {
+            FornecedorEnergia fornecedor = fornecedores.next ( );
+            double            despesa    = fornecedor.getFaturacao ( );
 
-            if (despesa > max_despesa) {
+            if ( despesa > max_despesa ) {
                 max_despesa = despesa;
                 mvp         = fornecedor;
             }
         }
 
-        return "Casa: " + mvp.getNome ( ) + "\nDespesa: " + max_despesa;
+        return "Fornecedor: " + mvp.getNome ( ) + "\nFaturação: " + max_despesa;
     }
 
     public
-    String listarFaturasFornecedor ( String nome ) {
-        StringBuilder    sb      = new StringBuilder ( "Fornecedor: " + nome + "{\n" );
-        Iterator<Fatura> faturas = this.modelo.getFatura ( nome );
+    String bills ( String nome , Iterator < Fatura > faturas ) {
+        StringBuilder sb = new StringBuilder ( nome + "{\n" );
 
-        while (faturas.hasNext ( )) {
+        while ( faturas.hasNext ( ) ) {
             sb.append ( faturas.next ( ).toString ( ) ).append ( "\n" );
         }
         sb.append ( "}" );

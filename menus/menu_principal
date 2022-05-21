@@ -1,7 +1,7 @@
    <<<Sir Manuel>>>
 -------------------------------------------------
-| ld -bin                     : Carregar dados (ficheiro binário)
-| ld -txt                     : Carregar dados (ficheiros de texto)
+| ld -bin <path>                : Carregar dados (ficheiro binário)
+| ld -txt <forncedores> <casas> : Carregar dados (ficheiros de texto)
 | ld -rand                    : Carregar com dados aleatórios
 | mod -allon                  : Ligar todos os dispositivos
 | mod -allof                  : Desligar todos os dispositivos
@@ -10,6 +10,10 @@
 | dev -on <id>                : Liga um dispositivo
 | dev -off <id>               : Desliga um dispositivo
 | delorean <n>                : Regressa <n> dias ao futuro
+| add -f <nome> <preco_base> <imposto> <funcao> : Adiciona um fornecedor
+| add -h <morada> <prop> <nif> <fornecedor> : Adiciona uma Casa
+| add -dev <morada> <divisao> <str_formatada> : Adiciona um SmartDevice
+| add -div <morada> <str_formatada : Adiciona uma Divisao
 | stat -all                   : Apresenta o estado do simulador
 | stat -h                     : Apresenta o estado das casas
 | stat -f                     : Apresenta o estado dos fornecedores
@@ -28,3 +32,7 @@
 | dev -max <casa> <id> <max>              : Muda o volume máximo da coluna
 | dev -cha <casa> <id> <canal>            : Muda o canal da coluna
 -------------------------------------------------
+Fornecedor -> nome;preco_base;imposto;funcao
+Casa -> morada;proprietario;fornecedor;nif{Divisao[Device1 Device2|Divisao[...
+Divisao -> nome[device1 device2...
+Device -> tipo:id;estado;preco;...

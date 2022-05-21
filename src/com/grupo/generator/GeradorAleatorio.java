@@ -20,6 +20,12 @@ public class GeradorAleatorio {
     private HashSet<FornecedorEnergia> fornecedores;
     private HashSet<Casa> casas;
 
+    private static int id_dispositivo = 0;
+    private static int id_divisao = 0;
+    private static int id_casa = 0;
+    private static int id_fornecedor = 0;
+    private static int id_pessoa = 0;
+
     public GeradorAleatorio(){
         this.random = new Random(LocalDateTime.now().toEpochSecond(ZoneOffset.UTC));
         this.fornecedores = new HashSet<>();
@@ -30,24 +36,24 @@ public class GeradorAleatorio {
     }
 
     private Set<SmartDevice> geraDispositivos(){
-        int n = Math.abs(random.nextInt(8) + 1);
+        int n = Math.abs(random.nextInt(20) + 1);
         Set<SmartDevice> devices = new HashSet<>(n);
         for (int i = 0; i < n; i++) {
             SmartDevice.Estado estado = (i&1) == 0 ? SmartDevice.Estado.LIGADO : SmartDevice.Estado.DESLIGADO;
             SmartBulb.Tonalidade tone = (i&1) == 0 ? SmartBulb.Tonalidade.FRIA : (i%3) == 0 ? SmartBulb.Tonalidade.NEUTRA : SmartBulb.Tonalidade.QUENTE;
-            SmartDevice device = (i&1) == 0 ? new SmartSpeaker("speaker" + i,estado,i*2.9+6,i*12,"canal"+i,i*13+1) :
-                    (i%4) == 0 ? new SmartBulb("bulb" + i,estado,i*2.9+6,tone,i*.043+0.23) :
-                    new SmartCamera ("cam"+i,estado,29.99,1024,3042);
+            SmartDevice device = (i&1) == 0 ? new SmartSpeaker("speaker" + id_dispositivo++,estado,i*2.9+6,i*12,"canal"+i,i*13+1) :
+                    (i%4) == 0 ? new SmartBulb("bulb" + id_dispositivo++,estado,i*2.9+6,tone,i*.043+0.23) :
+                    new SmartCamera ("cam"+id_dispositivo++,estado,29.99,1024,3042);
             devices.add(device);
         }
         return devices;
     }
 
     private Set<Divisao> geraDivisoes(){
-        int n = Math.abs(random.nextInt(4) + 1);
+        int n = Math.abs(random.nextInt(5) + 1);
         Set<Divisao> divisoes = new HashSet<>(n);
         for (int i = 0; i < n; i++) {
-            Divisao divisao = new Divisao("Divisao"+i,geraDispositivos());
+            Divisao divisao = new Divisao("Divisao"+id_divisao++,geraDispositivos());
             divisoes.add(divisao);
         }
         return divisoes;
@@ -57,7 +63,7 @@ public class GeradorAleatorio {
         int n = Math.abs(random.nextInt(20) + 1);
         HashSet<Casa> casas = new HashSet<>(n);
         for (int i = 0; i < n; i++) {
-            Casa casa = new Casa("Pessoa"+i,"Casa"+i,1200+i,geraDivisoes(),"null",-1);
+            Casa casa = new Casa("Pessoa"+id_pessoa++,"Casa"+id_casa++,1200+i,geraDivisoes(),"null",-1);
             casas.add(casa);
         }
         this.casas = casas;
@@ -67,7 +73,7 @@ public class GeradorAleatorio {
         int n = Math.abs(random.nextInt(12) + 1);
         HashSet<FornecedorEnergia> fornecedores = new HashSet<>(n);
         for (int i = 0; i < n; i++) {
-            FornecedorEnergia fornecedor = new FornecedorEnergia("Fornecedor" + i,i*0.25+0.13,0.13, new FuncaoConsumoPadrao());
+            FornecedorEnergia fornecedor = new FornecedorEnergia("Fornecedor" + id_fornecedor++,i*0.25+0.13,0.13, new FuncaoConsumoPadrao());
             fornecedores.add(fornecedor);
         }
         this.fornecedores = fornecedores;

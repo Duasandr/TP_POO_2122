@@ -4,6 +4,7 @@ import com.grupo.house.Casa;
 
 import java.io.Serializable;
 import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.Objects;
 import java.util.StringJoiner;
 
@@ -14,9 +15,8 @@ public class Fatura implements Serializable {
     private String morada;
     private String fornecedor;
     private double total_a_pagar;
-    private double total_consumo;
-    private LocalDateTime inicio;
-    private LocalDateTime fim;
+    private double        total_consumo;
+    private LocalDateTime data;
 
     //Variáveis de classe
 
@@ -35,25 +35,24 @@ public class Fatura implements Serializable {
         this.id = proximo_id;
     }
 
-    public Fatura(String morada , String fornecedor, double total_a_pagar , double total_consumo,LocalDateTime inicio,LocalDateTime fim){
+    public Fatura( String morada , String fornecedor, double total_a_pagar , double total_consumo, LocalDateTime data , LocalDateTime fim){
         this();
-        this.morada = morada;
-        this.fornecedor = fornecedor;
-        this.total_a_pagar = total_a_pagar;
-        this.total_consumo = total_consumo;
-        this.inicio = inicio;
-        this.fim = fim;
+        this.morada        = morada;
+        this.fornecedor    = fornecedor;
+        this.total_a_pagar = total_a_pagar * data.until ( fim, ChronoUnit.DAYS );
+        this.total_consumo = total_consumo * data.until ( fim, ChronoUnit.DAYS );
+        this.data          = fim;
         atualizaProximoId();
     }
 
     /**
      * Construtor por parâmetors.
      * @param casa
-     * @param inicio
+     * @param data
      * @param fim
      */
-    public Fatura(Casa casa , FornecedorEnergia fornecedor ,LocalDateTime inicio , LocalDateTime fim){
-        this(casa.getMorada(), fornecedor.getNome(), fornecedor.calculaValorPagar(casa), casa.getConsumoEnergia(), inicio,fim);
+    public Fatura( Casa casa , FornecedorEnergia fornecedor , LocalDateTime data , LocalDateTime fim){
+        this( casa.getMorada(), fornecedor.getNome(), fornecedor.calculaValorPagar(casa), casa.getConsumoEnergia(), data , fim);
         casa.setUltimaFatura ( this.id);
         fornecedor.atualizaFaturacao(this.total_a_pagar);
     }
@@ -68,8 +67,7 @@ public class Fatura implements Serializable {
         this.fornecedor = fatura.fornecedor;
         this.total_a_pagar = fatura.total_a_pagar;
         this.total_consumo = fatura.total_consumo;
-        this.inicio = fatura.inicio;
-        this.fim = fatura.fim;
+        this.data          = fatura.data;
     }
 
     public long getId() {
@@ -91,12 +89,8 @@ public class Fatura implements Serializable {
         return this.total_consumo;
     }
 
-    public LocalDateTime getInicio() {
-        return this.inicio;
-    }
-
-    public LocalDateTime getFim() {
-        return this.fim;
+    public LocalDateTime getData () {
+        return this.data;
     }
 
     /**
@@ -115,8 +109,7 @@ public class Fatura implements Serializable {
                 Double.compare ( fatura.total_consumo , total_consumo ) == 0 &&
                 Objects.equals ( morada , fatura.morada ) &&
                 Objects.equals ( fornecedor , fatura.fornecedor ) &&
-                Objects.equals ( inicio , fatura.inicio ) &&
-                Objects.equals ( fim , fatura.fim );
+                Objects.equals ( data , fatura.data );
     }
 
     /**
@@ -150,8 +143,7 @@ public class Fatura implements Serializable {
                 .add ( "fornecedor='" + fornecedor + "'" )
                 .add ( "total_a_pagar=" + total_a_pagar )
                 .add ( "total_consumo=" + total_consumo )
-                .add ( "inicio=" + inicio )
-                .add ( "fim=" + fim )
+                .add ( "data=" + data )
                 .toString ( );
     }
 }
